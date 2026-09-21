@@ -8,34 +8,36 @@
 [![Open Source? Yes!](https://badgen.net/badge/Open%20Source%20%3F/Yes%21/blue?icon=github)](./)
 [![MIT license](https://img.shields.io/badge/License-MIT-blue.svg)](./LICENSE)
 
-# NGINX + PHP 8.5 & POSTGRE 18+ + NODE JS 24
+# NGINX + NODE JS 24 + PHP 8.5 & POSTGRESQL 18+
 <br>
 
-This Infrastructure Platform repository is designed for back-end projects and provides three separate platforms:
+This repository serves as a multi-engine containerized infrastructure boilerplate designed to streamline local development and remote services for back-end or front-end applications. It provides a set of pre-configured, loosely coupled platform services optimized to work interchangeably with either Docker or Podman.
 
-## Platforms for Full-Stack Project
+It abstracts complex orchestration down to simple automation layers, allowing you to instantly spin up independent, ready-to-scale platform components.
+
+By decoupling the runtime services, this boilerplate ensures your primary application layer connects seamlessly to its supporting infrastructure components via standard local orchestration.
+
+## Included Platform Services
 
 - APP: [NGINX + NODE JS 24](./platforms/nginx-nodejs-24/README.md)
 - API: [NGINX + PHP 8.5](./platforms/nginx-php-8.5/README.md)
-- Database: [POSTGRE 18+](./platforms/pgsql-18/README.md)
-- Mail Service: [MAILHOG 1+](./platforms/mailhog-1/README.md)
+- Database: [POSTGRESQL 18+](./platforms/pgsql-18/README.md)
+- Mail Sandbox: [MAILHOG 1+](./platforms/mailhog-1/README.md)
 - Message Broker: [RABBITMQ 4+](./platforms/rabbitmq-4/README.md)
 <br><br>
 
 
 ## Index
 
-- [Repository Objetives](#repository-objetives)
-- [Requirements](#requirements)
+- [Repository Objectives](#repository-objectives)
+- [Orchestration & Platform Specifics](#orchestration)
 - [Containers Networking](#container-networking)
-- [Requirements](#requirements)
-- [Containers Networking](containers-networking)
-- [Platforms Settings](#platforms-setup)
-- [Platform Start Up](#platforms-startup)
+- [Platforms Setup](#platforms-setup)
+- [Platforms Startup](#platforms-startup)
 - [Using this Repository for Custom Project](#platform-usage)
 <br><br>
 
-## <a id="repository-objetives"></a>Repositoy Objetives
+## <a id="repository-objectives"></a>Repositoy Objectives
 
 ### Key principles and goals
 
@@ -72,27 +74,112 @@ By leveraging Platform Engineering principles, this project reduces cognitive lo
 - [What is Platform engineering? - Github](https://github.com/resources/articles/what-is-platform-engineering)
 <br><br>
 
-## <a id="requirements"></a>Requirements
+## <a id="orchestration"></a>Orchestration & Platform Specifics
 
-![Linux](https://img.shields.io/badge/Linux-FCC624?style=for-the-badge&logo=linux&logoColor=black)
-![Windows](https://img.shields.io/badge/Windows-0078D6?style=for-the-badge&logo=windows&logoColor=white)
-![Windows WSL2](https://img.shields.io/badge/Windows-WSL2-4E9A06?style=for-the-badge&logo=windows&logoColor=white)
-![MacOS](https://img.shields.io/badge/MacOS-f0f0f0?logo=apple&logoColor=black&style=for-the-badge)
-![gnu](https://img.shields.io/badge/gnu-%23A42E2B.svg?style=for-the-badge&logo=gnu&logoColor=white)
-![Docker](https://img.shields.io/badge/docker-%230db7ed.svg?style=for-the-badge&logo=docker&logoColor=white)
+### Supported Operating Systems
+
+![Linux](https://shields.io/badge/Linux-FCC624?style=for-the-badge&logo=linux&logoColor=black)
+![MacOS](https://shields.io/badge/MacOS-f0f0f0?logo=apple&logoColor=black&style=for-the-badge)
+![Windows](https://shields.io/badge/Windows-0078D6?style=for-the-badge&logo=windows&logoColor=white)
+![Windows WSL2](https://shields.io/badge/Windows-WSL2-4E9A06?style=for-the-badge&logo=windows&logoColor=white)
+
+* **Linux** (Native)
+* **macOS** (Intel & Apple Silicon M1–M5)
+* **Windows 10 / 11** (Most recommended via WSL2 or Hyper-V)
+
+### Minimum Hardware Requirements
+
+By default, local development environments run a minimal stack and do not process live production traffic. Therefore, resource utilization remains low. 
+
+| Machine       | Machine's minimum characteristics to run this repository                                          |
+| ------------- | ------------------------------------------------------------------------------------------------- |
+| CPU           | x86_64 / ARM64 - Supports modern Intel, AMD, and Apple Silicon chips.                             |
+| RAM           | 1 GB - Scale up if compiling memory-heavy stacks (e.g., Java, Angular).                           |
+| DISK          | 5 GB available space - Actual usage depends on downloaded container images and project cache.     |
+
+💡 **Tip 1 - Resource Management:** Properly restricting container CPU and memory allocations prevents resource starvation on your local host machine and closely mirrors production security best practices.
+
+💡 **Tip 2 - Environment Separation:** The automation commands provided in this repository are optimized for local development. In production or staging environments, standard cloud infrastructure designs typically distribute these platforms across separate VPS or cloud instances rather than running them all via a single local orchestration layer. To see how these components are isolated for production, you can find the individual single-service platforms listed under my [GitHub Repositories Profile](https://github.com/pabloripoll?tab=repositories).
+<br>
+
+### Task Automation (GNU Make)
+
+![GNU](https://img.shields.io/badge/gnu-%23A42E2B.svg?style=for-the-badge&logo=gnu&logoColor=white)
+
+It is highly recommended to use **GNU Make** on local to manage automated workflows from the root directory. On remote, you most probably choose bash script with or without a instance personalized Makefile.
+
+* **Recommended:** Ensure make is installed on your host system to use shortened convenience commands.
+* **Alternative:** If make is unavailable, commands must be executed manually within their respective subdirectories.
+
+### Environment Variables for Automation
+
+The automation layer dynamically adapts commands using variables defined in your root `.env` file. These variables control how your environment invokes the runtime engine.
+
+This repository supports local development using either **Docker** or **Podman**. You can configure your preferred container engine in your root `.env` file *(copied from `.env.example`)*: 
+
+```sh
+# ENGINE DEFINITION (docker or podman)
+CONTAINER_ENGINE=docker                                 # <- must define container engine system ------------------------------------------------------------> #
+
+# CONTAINER VARIABLES FOR AUTOMATION
+SUDO=sudo                                               # <- user priviledge for running engine commands, left blank if for running without sudo ------------> #
+DOCKER=$(SUDO) $(CONTAINER_ENGINE)                      # <- engine core command generator ------------------------------------------------------------------> #
+DOCKER_COMPOSE=$(SUDO) $(CONTAINER_ENGINE) compose      # <- targets "docker compose" / "docker-compose" or "podman compose" --------------------------------> #
+```
+
+These abstractions allow the root Makefile to trigger standard shortcuts (e.g., `make up`, `make down`) seamlessly across different setups.
+
+⚠️ **A Note on Variable Naming:** To preserve backward compatibility with previous releases, this repository retains the use of `DOCKER` and `DOCKER_COMPOSE` as variable names throughout the codebase, scripts, and automation files. Rest assured, if you set `CONTAINER_ENGINE=podman`, these variables will correctly map to your **Podman setup** behind the scenes.
+
+## Multi-Engine Architecture
+
+![Docker](https://shields.io/badge/docker-%230db7ed.svg?style=for-the-badge&logo=docker&logoColor=white)
+![Podman](https://shields.io/badge/-Podman-892CA0?style=for-the-badge&logo=podman&logoColor=white)
+
+The magic happens because modern Podman builds natively include the podman compose subcommand. It intercepts your standard, unmodified multi-container docker-compose.yml blueprints and automatically translates them down to Podman specifications.
+
+Because this repository abstracts commands like `$ sudo docker compose up -d` via the root `Makefile` using the environment variables like `($(DOCKER_COMPOSE))`, the custom automation orchestration *(gmake/make recipes)* will point cleanly to **Podman** behind the scenes. No translation layers or custom rewrites needed.
+
+This repository relies on a standard multi-container design (docker-compose.yml). You do not need to maintain multiple orchestration blueprints to switch engines:
+
+- **Docker Native:** Runs commands through the standard dockerd daemon.
+
+- **Podman Compatibility:** Modern versions of Podman include a built-in podman compose engine. When CONTAINER_ENGINE=podman is selected, Podman intercepts the docker-compose.yml specifications and automatically translates them into a Podman native configuration. No third-party translation tools are required.
+
+### Platform-Specific Setup Notes
+
+#### Linux & Windows (WSL2)
+
+Ensure your chosen container daemon is installed and running. If your local user account belongs to the docker or podman security group (allowing rootless container operations), you should set SUDO= to a blank value in your .env file.
+
+#### macOS
+
+Because macOS does not natively run Linux containers, both Docker and Podman spin up a background Linux Virtual Machine (VM) to host your workloads. If you choose to use Podman on macOS, execute the following steps once to initialize your engine environment:
+
+#### Docker
 
 Despite Docker’s cross-platform compatibility, for intermediate to advanced software development on environments other than Windows NT or macOS, automating the platform build and streamlining the process of starting feature development is crucial. This automation enables a more dynamic and efficient software development lifecycle.
 
-- Docker
-- Docker Compose
-- GNU Make *(otherwise commands must be executed manually)*
+- [Docker Documentation](https://docs.docker.com/engine/)
+- [Docker Installation](https://docs.docker.com/engine/install/)
 
-| Dev machine   | Machine's features                                                                            |
-| ------------- | --------------------------------------------------------------------------------------------- |
-| CPU           | Linux *(x64 - x86)* /  MacOS Intel *(x64 - x86)*, or M1                                       |
-| RAM           | *(for this container)*: 128 MB minimum.                                                       |
-| DISK          | 1 GB *(though is much less, its usage could be incremented depending on the project usage)*.  |
-<br>
+#### Podman
+
+Because macOS with cannot natively run Linux containers, there are two quick command-line commands you must run exactly once right after your brew install to initialize the engine. Open your terminal and run these commands to set up the Podman virtual machine:
+```sh
+# 1. Install Podman via Homebrew
+$ brew install podman
+
+# 2. Create the lightweight Apple Silicon Linux VM (Run once)
+$ podman machine init
+
+# 3. Fire up the Podman engine VM
+$ podman machine start
+```
+
+- [Podman Documentation](https://podman.io/docs)
+- [Podman Installation](https://podman.io/docs/installation)
+<br><br>
 
 ## <a id="containers-networking"></a>Containers Networking - Access Modes
 
@@ -119,44 +206,46 @@ Despite Docker’s cross-platform compatibility, for intermediate to advanced so
     - Host-gateway controls container-to-host communication.
 <br><br>
 
-## <a id="platforms-setup"></a>Configure Platforms
+## <a id="platforms-setup"></a>Platforms Setup
 
-Create the root `./.env` file from the [./.env.example](./.env.example) and follow its description to configure the platforms. Each variable has its own explanation.
+Create the root `./.env` file from the [./.env.example](./.env.example) and follow its description to configure the platforms required environment variables.
 
 Also create the root `./Makefile` file from [./resources/automation/local/Makefile](./resources/automation/local/Makefile) so it will be easy to manage the platforms from one location in the project.
 
-Each recipe has its own explanation or execute `make help` command to see them all. This streamlines the workflow for managing containers with mnemonic recipe names, avoiding the effort of remembering and typing each bash command line:
+Each recipe from this root `Makefile` has its own action description and can be read to remember on terminal by executing `make help` command to see them all. This streamlines the workflow for managing containers with mnemonic recipe names, avoiding the effort of remembering and typing each bash command line:
 ```bash
 $ make help
 ```
 
-Once variables set, each Docker platform container environment variables can be set by GNU Make recipes placed in the root of this repository:
+⚠️ **Important Setup Requirement:** Core platform components require independent configuration prior to initialization. Ensure you review the specific setup guidance in each sub-directory's `README.md` before starting up the container orchestration layer.
 
-- Set up the API container
+Once variables are set, each Docker platform container environment variables can be set by GNU Make recipes placed in the root of this repository:
+
+- Setup the API container
   ```bash
   $ make apirest-set
   ```
   **Remember**: *the `./api-rest` directory name is custimizable for binding between the container and local machine.*
 
-- Set up the database container
+- Setup the database container
   ```bash
   $ make db-set
   ```
 
-- Set up the mail service container
+- Setup the mail service container
   ```bash
   $ make mailer-set
   ```
 
-- Set up the message broker service container
+- Setup the message broker service container
   ```bash
   $ make broker-set
   ```
-<br>
+<br><br>
 
-## <a id="platforms-startup"></a>Start Up Platforms
+## <a id="platforms-startup"></a>Platforms Startup
 
-Create and start up the API container
+Create and startup the API container
 ```bash
 $ make apirest-create
 ```
@@ -165,7 +254,7 @@ $ make apirest-create
 Testing container visiting localhost with the assigned port, but with no database connection established or failed because of wrong configuration
 <br>
 
-Create and start up the database container
+Create and startup the database container
 ```bash
 $ make db-create
 ```
@@ -174,19 +263,19 @@ $ make db-create
 Once database service is up and running, status message will show successful connection
 <br>
 
-Create and start up the mail service container
+Create and startup the mail service container
 ```bash
 $ make mailer-create
 ```
 <br>
 
-Create and start up the message broker service container
+Create and startup the message broker service container
 ```bash
 $ make broker-create
 ```
 <br>
 
-Test mail service container by clicking "Direct Test MAIL" link
+Test mail sandobox service container by clicking "Direct Test MAIL" link
 <br>
 
 Docker information of both cointer up and running
@@ -195,13 +284,13 @@ $ sudo docker ps
 ```
 <br>
 
-Despite each container can be stop or restarted, they can be stop and destroy both containers simultaneously to clean up locally from Docker generated cache, without affecting other containers running on the same machine.
+Despite each container can be stop or restarted, they can be stopped and destroyed both containers simultaneously to clean up Docker generated cache, without affecting other containers running on the same machine.
 ```bash
 $ yes | make apirest-destroy db-destroy mailer-destroy broker-destroy
 ```
 <br><br>
 
-## <a id="platform-usage"></a>Use this Platform Repository for your own REST API repository
+## <a id="platform-usage"></a>Use this Platform Repository for your own projects
 
 Repository directories structure overview
 ```sh
@@ -229,7 +318,7 @@ Repository directories structure overview
 │   │   │   └── Dockerfile
 │   │   └── Makefile
 │   │
-│   ├── postgre-18
+│   ├── pgsql-18
 │   │   ├── docker
 │   │   │   ├── .env
 │   │   │   ├── docker-compose.yml
@@ -272,9 +361,9 @@ Set up platforms
 - Copy `.env.example` to `.env` and adjust settings (rest api port, database port, mail service port, container RAM usage, etc.)
 <br>
 
-### Managing the `apirest` Directory: Submodule vs Detached Repository
+### Managing the `./application` and `./api-rest` directories: Submodule vs Detached Repository
 
-To remove the `./api-rest` directory with the default installation content and install your desired repository inside it, there are two alternatives for managing both the platform and apirest repositories independently:
+To remove the `./application` and `./api-rest` default installation contents and install your desired repository inside it, there are two alternatives for managing both the platform and apirest repositories independently *(Do the same with both directories)*:
 
 Here’s a step-by-step guide for using this Platform repository along with your own REST API repository:
 
@@ -286,12 +375,12 @@ Here’s a step-by-step guide for using this Platform repository along with your
 
 > Git commands can be executed **whether from inside the container or on the local machine**.
 
-- Remove `apirest` from local and git cache:
+- Remove `./api-rest` from local and git cache:
   ```bash
-  $ git rm -r --cached -- "apirest/*" ":(exclude)apirest/.gitkeep"
+  $ git rm -r --cached -- "api-rest/*" ":(exclude)api-rest/.gitkeep"
   $ git clean -fd
   $ git reset --hard
-  $ git commit -m "maint: apirest directory and its default installation removed"
+  $ git commit -m "maint: api-rest directory and its default installation removed"
   ```
 
 - Clone the desired repository as a detached repository:
@@ -299,14 +388,14 @@ Here’s a step-by-step guide for using this Platform repository along with your
   $ git clone git@[vcs]:[account]/[repository].git ./api-rest
   ```
 
-- The `./api-rest` directory is now an **independent repository**, not tracked as a submodule in your main repo. You can use `git` commands freely inside `apirest` from anywhere.
+- The `./api-rest` directory is now an **independent repository**, not tracked as a submodule in your main repo. You can use `git` commands freely inside `./api-rest` from anywhere.
 <br>
 
 #### 2. **GIT Sub-module**
 
 > Git commands can be executed **only from inside the container**.
 
-- Remove `apirest` from local and git cache:
+- Remove `./api-rest` from local and git cache:
   ```bash
   $ rm -rfv ./api-rest/* ./api-rest/.[!.]*$
   $ git rm -r --cached apirest
