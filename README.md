@@ -37,6 +37,7 @@ By decoupling the runtime services, this boilerplate ensures your primary applic
 - [Using this Repository for Custom Project](#platform-usage)
 <br><br>
 
+
 ## <a id="repository-objectives"></a>Repositoy Objectives
 
 ### Key principles and goals
@@ -62,7 +63,6 @@ By leveraging Platform Engineering principles, this project reduces cognitive lo
 - Golden Paths: Predefined, optimized workflows and best practices that developers can follow to accomplish common tasks quickly and easily.
 
 - Treating the platform as a product: Platform engineers treat their IDP like a product, with developers as their customers, to ensure it meets the needs of the organization.
-<br>
 
 ### Read more:
 
@@ -241,7 +241,7 @@ Once variables are set, each Docker platform container environment variables can
   ```bash
   $ make broker-set
   ```
-<br><br>
+<br>
 
 ## <a id="platforms-startup"></a>Platforms Startup
 
