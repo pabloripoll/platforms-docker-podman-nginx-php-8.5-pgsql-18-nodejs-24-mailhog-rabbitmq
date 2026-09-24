@@ -4,9 +4,9 @@
 
 # INFRASTRUCTURE PLATFORMS
 
-[![Generic badge](https://img.shields.io/badge/version-1.0-blue.svg)](https://shields.io/)
+[![Generic badge](https://shields.io/badge/version-1.0-blue.svg)](https://shields.io/)
 [![Open Source? Yes!](https://badgen.net/badge/Open%20Source%20%3F/Yes%21/blue?icon=github)](./)
-[![MIT license](https://img.shields.io/badge/License-MIT-blue.svg)](./LICENSE)
+[![MIT license](https://shields.io/badge/License-MIT-blue.svg)](./LICENSE)
 
 # NGINX + NODE JS 24 + PHP 8.5 & POSTGRESQL 18+
 <br>
@@ -104,7 +104,7 @@ By default, local development environments run a minimal stack and do not proces
 
 ### Task Automation (GNU Make)
 
-![GNU](https://img.shields.io/badge/gnu-%23A42E2B.svg?style=for-the-badge&logo=gnu&logoColor=white)
+![GNU](https://shields.io/badge/gnu-%23A42E2B.svg?style=for-the-badge&logo=gnu&logoColor=white)
 
 It is highly recommended to use **GNU Make** on local to manage automated workflows from the root directory. On remote, you most probably choose bash script with or without a instance personalized Makefile.
 
