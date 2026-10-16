@@ -53,6 +53,8 @@ lerna-debug.log*
 !/services/website/.gitkeep
 /services/application/*
 !/services/application/.gitkeep
+/services/*-ai/*
+!/services/*-ai/.gitkeep
 
 # Developer's vault
 /vault
