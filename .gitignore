@@ -45,12 +45,14 @@ lerna-debug.log*
 !/resources/automation/remote/.gitkeep
 /resources/databases/*
 !/resources/databases/.gitkeep
-/api-grpc/*
-!/api-grpc/.gitkeep
-/api-rest/*
-!/api-rest/.gitkeep
-/application/*
-!/application/.gitkeep
+/services/api-*/*
+!/services/api-*/.gitkeep
+/services/app-*/*
+!/services/app-*/.gitkeep
+/services/website/*
+!/services/website/.gitkeep
+/services/application/*
+!/services/application/.gitkeep
 
 # Developer's vault
 /vault
