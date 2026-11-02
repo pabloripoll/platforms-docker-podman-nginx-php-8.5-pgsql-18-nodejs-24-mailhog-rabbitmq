@@ -29,7 +29,7 @@
 - [Platforms Setup](#platforms-setup)
 - [Platforms Startup](#platforms-startup)
 - [Use this Platform Repository for your own projects](#platforms-usage-for-projects)
-- [Projects with AI Support](#platforms-for-projects-ai-support)
+- [Platforms for Projects with AI Support](#platforms-for-projects-with-ai-support)
 <br><br>
 
 
@@ -505,11 +505,62 @@ To reuse any of the `./services` directory to install your desired repository in
 <br>
 
 
-## <a id="platforms-usage-for-projects"></a>Use this Platform Repository for your own projects
+## <a id="platforms-for-projects-with-ai-support"></a>Platforms for Projects with AI Support
 
-Transitioning from scattered application directories to a unified `./services/` workspace scales your environment beautifully. Introducing explicit `*-ai` specialized directories provides a forward-thinking setup for modern Platform Engineering, optimizing context boundaries for automated tooling.
+### AI Sandbox Architecture
+
+This repository uses a containerized environment (Docker/Podman) to run AI agents and assistance frameworks, rather than executing them directly on your local host machine.
+
+### Why Containerize AI Agents?
+
+Running AI agents *(Claude, Gemini, Copilot)* inside isolated containers provides major security, operational, and architectural advantages over a raw local installation:
+
+- **Security & Blast Radius Control**: AI agents with code-execution or tool-use capabilities can accidentally run destructive commands, mutate system files, or introduce security vulnerabilities. Containers ensure the agent operates inside a strict sandbox, completely isolated from your host operating system and sensitive local data.
+
+- **Network & Data Isolation**: Outbound connections can be tightly restricted. For example, the ai-claude platform can be routed through a dedicated network interface, while the mail-sandbox prevents the agent from accidentally blasting real emails to your contacts during an automation run.
+
+- **Elimination of "It Works on My Machine"**: AI frameworks *(especially Python-based tools like LangChain, CrewAI, or LlamaIndex)* rely on complex system-level dependencies, specific C-libraries, and strict Python versions. Packaging them inside platforms/ guarantees identical behavior across macOS, Linux, and Windows.
+
+- **State & Memory Disposability**: If an AI agent corrupts its local vector database, overflows its cache, or gets stuck in a recursive loop, you can instantly tear down the container and spin up a clean slate in seconds without leaving junk files on your hard drive.
+
+### Repository Structure
+
+```sh
+.
+├── platforms             # Docker/Podman infrastructure & network configurations
+│   ├── ai-claude         # Isolated environment for Claude/LLM agent execution
+│   ├── mail-sandbox      # Trapped SMTP server to safely test AI-generated emails
+│   ├── front-end         # Web UI server container
+│   ├── back-end          # Application server container
+│   ├── database          # Relational/NoSQL data storage
+│   └── broker            # Event broker/message queue for agent communication
+├── resources             # Local assets and volume mounts (git-ignored)
+│   ├── automation        # AI task scripts and prompt templates
+│   ├── databases         # Local database persistent volumes
+│   └── docs              # Reference documentation for RAG (Retrieval-Augmented Generation)
+└── services              # Source code repositories
+    ├── api-rest          # Core Back-end API framework
+    ├── api-rest-ai       # Back-end AI services (RAG pipelines, embeddings, LLM orchestration)
+    ├── application       # Core Front-end UI framework
+    └── application-ai    # Front-end UI components tailored for AI interaction (chat-bots, streaming)
+```
+
+### Core Infrastructure Pillars
+
+1. **Isolated Execution**
+    - Instead of installing heavy runtimes locally, use the configurations inside `./platforms/` to orchestrate your stack. The AI agents connect safely to the database and broker inside a closed virtual network, mimicking production environments exactly.
+
+2. **Guardrailed Testing**
+    - When testing AI-driven automations *(like automated customer support or report delivery)*, all mail traffic is intercepted by mail-sandbox. This guarantees no AI-generated test emails ever leak to real-world clients during development.
+
+3. **Separation of Concerns**
+    - The repository explicitly decouples standard business logic from AI experimental code:
+        - `-ai` suffixes handle non-deterministic LLM operations, vector search, and token management.
+        - Standard directories handle reliable, predictable business data and application rendering.
 
 ### Why this Architecture is an Improvement
+
+Transitioning from scattered application directories to a unified `./services/` workspace scales your environment beautifully. Introducing explicit `*-ai` specialized directories provides a forward-thinking setup for modern Platform Engineering, optimizing context boundaries for automated tooling.
 
 • **Cleaner Namespace (Logical Grouping)**: Moving services like `./services/api-rest` under a unified workspace declutters the root directory. It cleanly isolates core business logic from underlying infrastructure configuration (`/platforms`, `/resources`).
 
@@ -517,7 +568,7 @@ Transitioning from scattered application directories to a unified `./services/` 
 
 • **Safer Git/Detached Repo Tracking**: If you use the Git Detached Repository approach for your application services, keeping those external repositories isolated inside `./services/` prevents main-repo tracking pollution even more reliably.
 
-### What goes inside the `*-ai` directories?
+### What goes inside the `/services/*-ai` directories?
 
 To maximize the value of this boilerplate, populate the `./services/api-rest-ai/` and `./services/website-ai/` directories with standardized developer-agent configurations:
 
@@ -541,9 +592,9 @@ services:
     image: nginx:alpine
     volumes:
       # Bind Mount 1: Core application business logic
-      - ./services/api-rest:/var/www/html
+      - ./services/api-rest:~/api-rest
       # Bind Mount 2: Isolated AI assistance schemas
-      - ./services/api-rest-ai:/var/www/ai-context
+      - ./services/api-rest-ai:~/ai-context
 ```
 
 > ⚠️ **Note**: You cannot bind mount two different local directories onto the exact same destination path inside the container simultaneously. The subsequent mount will overwrite or obscure the previous one.
@@ -567,9 +618,9 @@ services:
     image: nginx:alpine
     volumes:
       # ':Z' configures a private, unshared label exclusive to this container
-      - ./services/api-rest:/var/www/html:Z
+      - ./services/api-rest:~/api-rest:Z
       # ':z' configures a shared label if multiple containers require access
-      - ./services/api-rest-ai:/var/www/ai-context:z
+      - ./services/api-rest-ai:~/ai-context:z
 ```
 
 ### Why Decouple the AI Assistance Layer?
