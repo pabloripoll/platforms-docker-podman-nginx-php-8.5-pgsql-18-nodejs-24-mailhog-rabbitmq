@@ -39,6 +39,9 @@ yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
 
+# Platforms
+/platforms/ai-*
+
 # Project
 /Makefile
 /resources/automation/remote/*
