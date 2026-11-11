@@ -528,7 +528,9 @@ Running AI agents *(Claude, Gemini, Copilot)* inside isolated containers provide
 ```sh
 .
 ├── platforms             # Docker/Podman infrastructure & network configurations
-│   ├── ai-claude         # Isolated environment for Claude/LLM agent execution
+│   ├── agent-api         # Example target: Git-ignored workspace for an API service agent
+│   ├── agent-web         # Example target: Git-ignored workspace for a UI/Web application agent
+│   ├── agent-base        # Base container boilerplate (explicitly un-ignored in git)
 │   ├── mail-sandbox      # Trapped SMTP server to safely test AI-generated emails
 │   ├── front-end         # Web UI server container
 │   ├── back-end          # Application server container
@@ -545,6 +547,8 @@ Running AI agents *(Claude, Gemini, Copilot)* inside isolated containers provide
     └── application-ai    # Front-end UI components tailored for AI interaction (chat-bots, streaming)
 ```
 
+💡 **Architectural Flexibility**: By default, this setup orchestrates agents in isolated containers for scalability. However, via the .env and Makefile configuration, you can dynamically adjust your build to bind all back-end/front-end services directly into a single monolithic agent container for lightweight local testing.
+
 ### Core Infrastructure Pillars
 
 1. **Isolated Execution**
@@ -555,7 +559,7 @@ Running AI agents *(Claude, Gemini, Copilot)* inside isolated containers provide
 
 3. **Separation of Concerns**
     - The repository explicitly decouples standard business logic from AI experimental code:
-        - `-ai` suffixes handle non-deterministic LLM operations, vector search, and token management.
+        - `./services/*-ai` suffixes handle non-deterministic LLM operations, vector search, and token management.
         - Standard directories handle reliable, predictable business data and application rendering.
 
 ### Why this Architecture is an Improvement

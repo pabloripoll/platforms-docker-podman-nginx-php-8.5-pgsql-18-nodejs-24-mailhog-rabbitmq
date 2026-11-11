@@ -40,7 +40,8 @@ pnpm-debug.log*
 lerna-debug.log*
 
 # Platforms
-/platforms/ai-*
+/platforms/agent-*
+!platforms/agent-base
 
 # Project
 /Makefile
