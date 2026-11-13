@@ -1,34 +1,19 @@
 # This Makefile requires GNU Make.
 MAKEFLAGS += --silent
 
-# Note: Do NOT indent these lines with a TAB. Use spaces or no indentation
-# := prevents make from re-evaluating the shell context every single time the color variable is referenced
-ifeq ($(OS),Windows_NT)
-    DETECTED_OS := Windows
-	PRINT_CMD = powershell -NoProfile -Command "Write-Host"
-    # Windows native uses PowerShell to safely render ANSI colors
-    C_BLU := `e[0;34m`
-    C_GRN := `e[0;32m`
-    C_RED := `e[0;31m`
-    C_YEL := `e[0;33m`
-    C_END := `e[0m`
-else
-    DETECTED_OS := $(shell uname -s)
-	PRINT_CMD = echo -e
-    # Linux / macOS / WSL2 codes for rendering colors
-    C_BLU := '\033[0;34m'
-    C_GRN := '\033[0;32m'
-    C_RED := '\033[0;31m'
-    C_YEL := '\033[0;33m'
-    C_END := '\033[0m'
-endif
+# Linux / macOS / WSL2 codes for rendering colors
+C_BLU := '\033[0;34m'
+C_GRN := '\033[0;32m'
+C_RED := '\033[0;31m'
+C_YEL := '\033[0;33m'
+C_END := '\033[0m'
 
 # Environment constants
 include .env
 
 # Helpers
-ROOT_DIR=$(patsubst %/,%,$(dir $(realpath $(firstword $(MAKEFILE_LIST)))))
-DIR_BASENAME=$(shell basename $(ROOT_DIR))
+DIR_ROOT=$(patsubst %/,%,$(dir $(realpath $(firstword $(MAKEFILE_LIST)))))
+DIR_BASENAME=$(shell basename $(DIR_ROOT))
 
 # -------------------------------------------------------------------------------------------------
 #  Help
@@ -36,9 +21,9 @@ DIR_BASENAME=$(shell basename $(ROOT_DIR))
 .PHONY: help
 
 help: ## shows this Makefile help message
-	echo "Usage: $$ make "${C_GRN}"[target]"${C_END}
-	echo ${C_GRN}"Targets:"${C_END}
-	awk 'BEGIN {FS = ":.*?## "} /^[a-zA-Z0-9_-]+:.*?## / {printf "$$ make \033[0;33m%-30s\033[0m %s\n", $$1, $$2}' ${MAKEFILE_LIST} | column -t -c 2 -s ':#'
+	@echo "Usage: $$ make "${C_GRN}"[target]"${C_END}
+	@echo ${C_GRN}"Targets:"${C_END}
+	@awk 'BEGIN {FS = ":.*?## "} /^[a-zA-Z0-9_-]+:.*?## / {printf "$$ make \033[0;33m%-30s\033[0m %s\n", $$1, $$2}' ${MAKEFILE_LIST} | column -t -c 2 -s ':#'
 
 # -------------------------------------------------------------------------------------------------
 #  System
@@ -47,25 +32,25 @@ help: ## shows this Makefile help message
 
 local_ip ?= $(word 1,$(shell hostname -I))
 local-info: ## shows local machine ip and container ports set
-	echo ${C_BLU}"Local IP / Hostname:"${C_END} ${C_YEL}"$(local_ip)"${C_END}
+	@echo ${C_BLU}"Local Hostname:"${C_END} ${C_YEL}"$(local_ip)"${C_END}
 
 user ?= ${USER}
 group ?= root
 local-ownership: ## shows local ownership
-	echo $(user):$(group)
+	@echo $(user):$(group)
 
 local-ownership-set: ## sets recursively local root directory ownership
-	$(SUDO) chown -R ${user}:${group} $(ROOT_DIR)/
+	$(SUDO) chown -R ${user}:${group} $(DIR_ROOT)/
 
 # -------------------------------------------------------------------------------------------------
 #  Networking
 # -------------------------------------------------------------------------------------------------
-.PHONY: network-exists network-create network-info network-destroy
+.PHONY: networks-list network-create network-info network-destroy
 
-network-exists: ## lists all local networks
+networks-list: ## lists all local networks
 	$(ENGINE) network ls
 
-network-create: ## creates network
+network-create: ## creates a network
 	$(ENGINE) network create --driver bridge $(SERVICE_LEAD)-$(SERVICE_CNET)
 
 network-info: ## shows network information
@@ -82,13 +67,13 @@ network-destroy: ## destroys network
 web-hostcheck: ## shows this project ports availability on local machine for the container
 	cd ./platforms/$(WEBAPP_PLTF) && $(MAKE) port-check
 
-web-info: ## shows the ENGINE related information
+web-info: ## shows the container relevant information
 	cd ./platforms/$(WEBAPP_PLTF) && $(MAKE) info
 
 web-set: ## sets the enviroment file to build the container
 	cd ./platforms/$(WEBAPP_PLTF) && $(MAKE) env-set
 
-web-build: ## builds and ensures changes in the ENGINEfile, build steps, or copied-in files are applied
+web-build: ## builds and ensures changes in the file, build steps, or copied-in files are applied
 	cd ./platforms/$(WEBAPP_PLTF) && $(MAKE) build
 
 web-create: ## starts up or creates the container for running in detached mode
@@ -114,29 +99,28 @@ web-restart: ## restarts the running container
 	cd ./platforms/$(WEBAPP_PLTF) && $(MAKE) restart
 
 web-down: ## stops and removes the container, network and volume established
-	echo ${C_RED}"Attention!"${C_END};
-	echo ${C_YEL}"You're about to stop and remove the "${C_BLU}"$(WEBAPP_PLTF)"${C_END}" container with its network and volume."${C_END};
+	@echo ${C_RED}"Attention!"${C_END};
+	@echo ${C_YEL}"You're about to stop and remove the "${C_BLU}"$(WEBAPP_PLTF)"${C_END}" container with its network and volume."${C_END};
 	@echo -n ${C_RED}"Are you sure to proceed? "${C_END}"[y/n]: " && read response && if [ $${response:-'n'} != 'y' ]; then \
-        echo ${C_GRN}"O.K.! container continues with its latest status."${C_END}; \
+        @echo ${C_GRN}"O.K.! container continues with its latest status."${C_END}; \
     else \
 		cd ./platforms/$(WEBAPP_PLTF) && $(MAKE) clear; \
-		echo ${C_GRN}"O.K.! $(WEBAPP_PLTF) has been cleared down."${C_END}; \$(ENGINE)
-$(ENGINE)
+		@echo ${C_GRN}"O.K.! $(WEBAPP_PLTF) has been down and cleared."${C_END}; \
 	fi
 
-web-destroy: ## destroys completly the container
-	echo ${C_RED}"Attention!"${C_END};
-	echo ${C_YEL}"You're about to remove the "${C_BLU}"$(WEBAPP_PLTF)"${C_END}" container and delete its image resource."${C_END};
+web-destroy: ## destroys completely the container with its data
+	@echo ${C_RED}"Attention!"${C_END};
+	@echo ${C_YEL}"You're about to remove the "${C_BLU}"$(WEBAPP_PLTF)"${C_END}" container and delete its image resource."${C_END};
 	@echo -n ${C_RED}"Are you sure to proceed? "${C_END}"[y/n]: " && read response && if [ $${response:-'n'} != 'y' ]; then \
-        echo ${C_GRN}"O.K.! container continues with its latest status."${C_END}; \
+        @echo ${C_GRN}"O.K.! container continues with its latest status."${C_END}; \
     else \
 		cd ./platforms/$(WEBAPP_PLTF) && $(MAKE) clear destroy; \
-		echo -n ${C_GRN}"Do you want to clear $(ENGINE) cache? "${C_END}"[y/n]: " && read response && if [ $${response:-'n'} != 'y' ]; then \
-			echo ${C_YEL}"The following command is delegated to be executed by user:"${C_END}; \
-			echo "$$ $(ENGINE_COMMAND) system prune"; \
+		@echo -n ${C_GRN}"Do you want to clear $(ENGINE) cache? "${C_END}"[y/n]: " && read response && if [ $${response:-'n'} != 'y' ]; then \
+			@echo ${C_YEL}"The following command is delegated to be executed by user:"${C_END}; \
+			@echo "$$ $(ENGINE_COMMAND) system prune"; \
 		else \
 			$(ENGINE_COMMAND) system prune -f; \
-			echo ${C_GRN}"O.K.! $(ENGINE) cache has been cleared up."${C_END}; \
+			@echo ${C_GRN}"O.K.! $(ENGINE) cache has been cleared up."${C_END}; \
 		fi \
 	fi
 
@@ -148,13 +132,13 @@ web-destroy: ## destroys completly the container
 api-hostcheck: ## shows this project ports availability on local machine for apirest container
 	cd ./platforms/$(API_PLTF) && $(MAKE) port-check
 
-api-info: ## shows the apirest ENGINE related information
+api-info: ## shows the container relevant information
 	cd ./platforms/$(API_PLTF) && $(MAKE) info
 
-api-set: ## sets the apirest enviroment file to build the container
+api-set: ## sets the enviroment file to build the container
 	cd ./platforms/$(API_PLTF) && $(MAKE) env-set
 
-api-build: ## builds and ensures changes in the ENGINEfile, build steps, or copied-in files are applied
+api-build: ## builds and ensures changes in the file, build steps, or copied-in files are applied
 	cd ./platforms/$(API_PLTF) && $(MAKE) build
 
 api-create: ## starts up or creates the container for running in detached mode
@@ -180,28 +164,28 @@ api-restart: ## restarts the running apirest container
 	cd ./platforms/$(API_PLTF) && $(MAKE) restart
 
 api-down: ## stops and removes the container, network and volume established
-	echo ${C_RED}"Attention!"${C_END};
-	echo ${C_YEL}"You're about to stop and remove the "${C_BLU}"$(API_PLTF)"${C_END}" container with its network and volume."${C_END};
+	@echo ${C_RED}"Attention!"${C_END};
+	@echo ${C_YEL}"You're about to stop and remove the "${C_BLU}"$(API_PLTF)"${C_END}" container with its network and volume."${C_END};
 	@echo -n ${C_RED}"Are you sure to proceed? "${C_END}"[y/n]: " && read response && if [ $${response:-'n'} != 'y' ]; then \
-        echo ${C_GRN}"O.K.! container continues with its latest status."${C_END}; \
+        @echo ${C_GRN}"O.K.! container continues with its latest status."${C_END}; \
     else \
 		cd ./platforms/$(API_PLTF) && $(MAKE) clear; \
-		echo ${C_GRN}"O.K.! $(API_PLTF) has been cleared down."${C_END}; \
+		@echo ${C_GRN}"O.K.! $(API_PLTF) has been down and cleared."${C_END}; \
 	fi
 
-api-destroy: ## destroys completely the apirest container and its image
-	echo ${C_RED}"Attention!"${C_END};
-	echo ${C_YEL}"You're about to remove the "${C_BLU}"$(API_PLTF)"${C_END}" container and delete its image resource."${C_END};
+api-destroy: ## destroys completely the container with its data
+	@echo ${C_RED}"Attention!"${C_END};
+	@echo ${C_YEL}"You're about to remove the "${C_BLU}"$(API_PLTF)"${C_END}" container and delete its image resource."${C_END};
 	@echo -n ${C_RED}"Are you sure to proceed? "${C_END}"[y/n]: " && read response && if [ $${response:-'n'} != 'y' ]; then \
-        echo ${C_GRN}"O.K.! container continues with its latest status."${C_END}; \
+        @echo ${C_GRN}"O.K.! container continues with its latest status."${C_END}; \
     else \
 		cd ./platforms/$(API_PLTF) && $(MAKE) clear destroy; \
-		echo -n ${C_GRN}"Do you want to clear $(ENGINE) cache? "${C_END}"[y/n]: " && read response && if [ $${response:-'n'} != 'y' ]; then \
-			echo ${C_YEL}"The following command is delegated to be executed by user:"${C_END}; \
-			echo "$$ $(ENGINE_COMMAND) system prune"; \
+		@echo -n ${C_GRN}"Do you want to clear $(ENGINE) cache? "${C_END}"[y/n]: " && read response && if [ $${response:-'n'} != 'y' ]; then \
+			@echo ${C_YEL}"The following command is delegated to be executed by user:"${C_END}; \
+			@echo "$$ $(ENGINE_COMMAND) system prune"; \
 		else \
 			$(ENGINE_COMMAND) system prune -f; \
-			echo ${C_GRN}"O.K.! $(ENGINE) cache has been cleared up."${C_END}; \
+			@echo ${C_GRN}"O.K.! $(ENGINE) cache has been cleared up."${C_END}; \
 		fi \
 	fi
 
@@ -213,13 +197,13 @@ api-destroy: ## destroys completely the apirest container and its image
 db-hostcheck: ## shows this project ports availability on local machine for database container
 	cd ./platforms/$(DATABASE_PLTF) && $(MAKE) port-check
 
-db-info: ## shows ENGINE related information
+db-info: ## shows container relevant information
 	cd ./platforms/$(DATABASE_PLTF) && $(MAKE) info
 
-db-set: ## sets the database enviroment file to build the container
+db-set: ## sets the enviroment file to build the container
 	cd ./platforms/$(DATABASE_PLTF) && $(MAKE) env-set
 
-db-build: ## builds and ensures changes in the ENGINEfile, build steps, or copied-in files are applied
+db-build: ## builds and ensures changes in the file, build steps, or copied-in files are applied
 	cd ./platforms/$(DATABASE_PLTF) && $(MAKE) build
 
 db-create: ## starts up or creates the container for running in detached mode
@@ -241,30 +225,30 @@ db-restart: ## restarts the running database container
 	cd ./platforms/$(DATABASE_PLTF) && $(MAKE) restart
 
 db-down: ## stops and removes the container, network and volume established
-	echo ${C_RED}"Attention!"${C_END};
-	echo ${C_YEL}"You're about to stop and remove the "${C_BLU}"$(DATABASE_PLTF)"${C_END}" container with its network and volume."${C_END};
+	@echo ${C_RED}"Attention!"${C_END};
+	@echo ${C_YEL}"You're about to stop and remove the "${C_BLU}"$(DATABASE_PLTF)"${C_END}" container with its network and volume."${C_END};
 	@echo -n ${C_RED}"Are you sure to proceed? "${C_END}"[y/n]: " && read response && if [ $${response:-'n'} != 'y' ]; then \
-        echo ${C_GRN}"O.K.! container continues with its latest status."${C_END}; \
+        @echo ${C_GRN}"O.K.! container continues with its latest status."${C_END}; \
     else \
 		cd ./platforms/$(DATABASE_PLTF) && $(MAKE) clear; \
-		echo ${C_GRN}"O.K.! $(DATABASE_PLTF) has been cleared down."${C_END}; \
+		@echo ${C_GRN}"O.K.! $(DATABASE_PLTF) has been down and cleared."${C_END}; \
 	fi
 
-db-destroy: ## destroys completly the database container with its data
-	echo ${C_RED}"Attention!"${C_END};
-	echo ${C_YEL}"You're about to remove the "${C_BLU}"$(DATABASE_PLTF)"${C_END}" container and delete its image resource and persistance data."${C_END};
+db-destroy: ## destroys completely the container with its data
+	@echo ${C_RED}"Attention!"${C_END};
+	@echo ${C_YEL}"You're about to remove the "${C_BLU}"$(DATABASE_PLTF)"${C_END}" container and delete its image resource and persistance data."${C_END};
 	@echo -n ${C_RED}"Are you sure to proceed? "${C_END}"[y/n]: " && read response && if [ $${response:-'n'} != 'y' ]; then \
-        echo ${C_GRN}"O.K.! container continues with its latest status."${C_END}; \
+        @echo ${C_GRN}"O.K.! container continues with its latest status."${C_END}; \
     else \
 		cd ./platforms/$(DATABASE_PLTF) && $(MAKE) clear destroy; \
-		echo -n ${C_GRN}"Do you want to clear $(ENGINE) cache? "${C_END}"[y/n]: " && read response && if [ $${response:-'n'} != 'y' ]; then \
-			echo ${C_YEL}"The following commands are delegated to be executed by user:"${C_END}; \
-			echo "$$ $(ENGINE_COMMAND) system prune"; \
-			echo "$$ $(ENGINE_COMMAND) volume prune"; \
+		@echo -n ${C_GRN}"Do you want to clear $(ENGINE) cache? "${C_END}"[y/n]: " && read response && if [ $${response:-'n'} != 'y' ]; then \
+			@echo ${C_YEL}"The following commands are delegated to be executed by user:"${C_END}; \
+			@echo "$$ $(ENGINE_COMMAND) system prune"; \
+			@echo "$$ $(ENGINE_COMMAND) volume prune"; \
 		else \
 			$(ENGINE_COMMAND) system prune -f; \
 			$(ENGINE_COMMAND) volume prune -f; \
-			echo ${C_GRN}"O.K.! $(ENGINE) cache has been cleared up."${C_END}; \
+			@echo ${C_GRN}"O.K.! $(ENGINE) cache has been cleared up."${C_END}; \
 		fi \
 	fi
 
@@ -273,7 +257,7 @@ db-destroy: ## destroys completly the database container with its data
 db-test-up: ## creates a side database for testing porpuses
 	cd ./platforms/$(DATABASE_PLTF) && $(MAKE) test-up
 
-db-test-down: ## drops the side testing database
+db-test-down: ## drops the side database for testing porpuses
 	cd ./platforms/$(DATABASE_PLTF) && $(MAKE) test-down
 
 .PHONY: db-sql-install db-sql-replace db-sql-backup db-sql-remote db-copy-remote
@@ -302,13 +286,13 @@ db-sql-drop: ## drops the container main database but recreates the database wit
 mailer-hostcheck: ## shows this project ports availability on local machine for mailer container
 	cd ./platforms/$(MAILER_PLTF) && $(MAKE) port-check
 
-mailer-info: ## shows the mailer ENGINE related information
+mailer-info: ## shows the container relevant information
 	cd ./platforms/$(MAILER_PLTF) && $(MAKE) info
 
-mailer-set: ## sets the mailer enviroment file to build the container
+mailer-set: ## sets the enviroment file to build the container
 	cd ./platforms/$(MAILER_PLTF) && $(MAKE) env-set
 
-mailer-build: ## builds mailer and ensures changes in the ENGINEfile, build steps, or copied-in files are applied
+mailer-build: ## builds mailer and ensures changes in the file, build steps, or copied-in files are applied
 	cd ./platforms/$(MAILER_PLTF) && $(MAKE) build
 
 mailer-create: ## starts up mailer or creates the container for running in detached mode
@@ -330,28 +314,28 @@ mailer-restart: ## restarts the running mailer container
 	cd ./platforms/$(MAILER_PLTF) && $(MAKE) restart
 
 mailer-down: ## stops and removes the container, network and volume established
-	echo ${C_RED}"Attention!"${C_END};
-	echo ${C_YEL}"You're about to stop and remove the "${C_BLU}"$(MAILER_PLTF)"${C_END}" container with its network and volume."${C_END};
+	@echo ${C_RED}"Attention!"${C_END};
+	@echo ${C_YEL}"You're about to stop and remove the "${C_BLU}"$(MAILER_PLTF)"${C_END}" container with its network and volume."${C_END};
 	@echo -n ${C_RED}"Are you sure to proceed? "${C_END}"[y/n]: " && read response && if [ $${response:-'n'} != 'y' ]; then \
-        echo ${C_GRN}"K.O.! container continues with its latest status."${C_END}; \
+        @echo ${C_GRN}"K.O.! container continues with its latest status."${C_END}; \
     else \
 		cd ./platforms/$(MAILER_PLTF) && $(MAKE) clear; \
-		echo ${C_GRN}"O.K.! $(MAILER_PLTF) has been cleared down."${C_END}; \
+		@echo ${C_GRN}"O.K.! $(MAILER_PLTF) has been down and cleared."${C_END}; \
 	fi
 
-mailer-destroy: ## destroys completly the mailer container
-	echo ${C_RED}"Attention!"${C_END};
-	echo ${C_YEL}"You're about to remove the "${C_BLU}"$(MAILER_PLTF)"${C_END}" container and delete its image resource."${C_END};
+mailer-destroy: ## destroys completely the container with its data
+	@echo ${C_RED}"Attention!"${C_END};
+	@echo ${C_YEL}"You're about to remove the "${C_BLU}"$(MAILER_PLTF)"${C_END}" container and delete its image resource."${C_END};
 	@echo -n ${C_RED}"Are you sure to proceed? "${C_END}"[y/n]: " && read response && if [ $${response:-'n'} != 'y' ]; then \
-        echo ${C_GRN}"O.K.! container continues with its latest status."${C_END}; \
+        @echo ${C_GRN}"O.K.! container continues with its latest status."${C_END}; \
     else \
 		cd ./platforms/$(MAILER_PLTF) && $(MAKE) clear destroy; \
-		echo -n ${C_GRN}"Do you want to clear $(ENGINE) cache? "${C_END}"[y/n]: " && read response && if [ $${response:-'n'} != 'y' ]; then \
-			echo ${C_YEL}"The following command is delegated to be executed by user:"${C_END}; \
-			echo "$$ $(ENGINE_COMMAND) system prune"; \
+		@echo -n ${C_GRN}"Do you want to clear $(ENGINE) cache? "${C_END}"[y/n]: " && read response && if [ $${response:-'n'} != 'y' ]; then \
+			@echo ${C_YEL}"The following command is delegated to be executed by user:"${C_END}; \
+			@echo "$$ $(ENGINE_COMMAND) system prune"; \
 		else \
 			$(ENGINE_COMMAND) system prune -f; \
-			echo ${C_GRN}"O.K.! $(ENGINE) cache has been cleared up."${C_END}; \
+			@echo ${C_GRN}"O.K.! $(ENGINE) cache has been cleared up."${C_END}; \
 		fi \
 	fi
 
@@ -360,60 +344,59 @@ mailer-destroy: ## destroys completly the mailer container
 # -------------------------------------------------------------------------------------------------
 .PHONY: broker-hostcheck broker-info broker-set broker-create broker-network broker-ssh broker-start broker-stop broker-destroy
 
-broker-hostcheck: ## shows this project ports availability on local machine for broker container
+broker-hostcheck: ## shows this project ports availability on local machine for container
 	cd ./platforms/$(BROKER_PLTF) && $(MAKE) port-check
 
-broker-info: ## shows the broker ENGINE related information
+broker-info: ## shows the container relevant information
 	cd ./platforms/$(BROKER_PLTF) && $(MAKE) info
 
-broker-set: ## sets the broker enviroment file to build the container
+broker-set: ## sets the enviroment file to build the container
 	cd ./platforms/$(BROKER_PLTF) && $(MAKE) env-set
 
-broker-build: ## builds broker and ensures changes in the ENGINEfile, build steps, or copied-in files are applied
+broker-build: ## builds and ensures changes in the file, build steps, or copied-in files are applied
 	cd ./platforms/$(BROKER_PLTF) && $(MAKE) build
 
-broker-create: ## starts up broker or creates the container for running in detached mode
+broker-create: ## starts up or creates the container for running in detached mode
 	cd ./platforms/$(BROKER_PLTF) && $(MAKE) up
 
-broker-network: ## starts up broker into an existing custom network for container-to-container communication, runnning in detached mode
+broker-network: ## starts up into an existing custom network for container-to-container communication, runnning in detached mode
 	cd ./platforms/$(BROKER_PLTF) && $(MAKE) clear network
 
-broker-ssh: ## enters the broker container shell
+broker-ssh: ## enters the container shell
 	cd ./platforms/$(BROKER_PLTF) && $(MAKE) ssh
 
-broker-start: ## starts the broker container running
+broker-start: ## starts the container running
 	cd ./platforms/$(BROKER_PLTF) && $(MAKE) start
 
-broker-stop: ## stops the broker container but its assets will not be destroyed$(ENGINE)
-$(ENGINE)
+broker-stop: ## stops the container but its assets will not be destroyed
 	cd ./platforms/$(BROKER_PLTF) && $(MAKE) stop
 
-broker-restart: ## restarts the running broker container
+broker-restart: ## restarts the running container
 	cd ./platforms/$(BROKER_PLTF) && $(MAKE) restart
 
 broker-down: ## stops and removes the container, network and volume established
-	echo ${C_RED}"Attention!"${C_END};
-	echo ${C_YEL}"You're about to stop and remove the "${C_BLU}"$(BROKER_PLTF)"${C_END}" container with its network and volume."${C_END};
+	@echo ${C_RED}"Attention!"${C_END};
+	@echo ${C_YEL}"You're about to stop and remove the "${C_BLU}"$(BROKER_PLTF)"${C_END}" container with its network and volume."${C_END};
 	@echo -n ${C_RED}"Are you sure to proceed? "${C_END}"[y/n]: " && read response && if [ $${response:-'n'} != 'y' ]; then \
-        echo ${C_GRN}"O.K.! container continues with its latest status."${C_END}; \
+        @echo ${C_GRN}"O.K.! container continues with its latest status."${C_END}; \
     else \
 		cd ./platforms/$(BROKER_PLTF) && $(MAKE) clear; \
-		echo ${C_GRN}"O.K.! $(BROKER_PLTF) has been cleared down."${C_END}; \
+		@echo ${C_GRN}"O.K.! $(BROKER_PLTF) has been down and cleared."${C_END}; \
 	fi
 
-broker-destroy: ## destroys completly the broker container
-	echo ${C_RED}"Attention!"${C_END};
-	echo ${C_YEL}"You're about to remove the "${C_BLU}"$(BROKER_PLTF)"${C_END}" container and delete its image resource."${C_END};
+broker-destroy: ## destroys completely the container with its data
+	@echo ${C_RED}"Attention!"${C_END};
+	@echo ${C_YEL}"You're about to remove the "${C_BLU}"$(BROKER_PLTF)"${C_END}" container and delete its image resource."${C_END};
 	@echo -n ${C_RED}"Are you sure to proceed? "${C_END}"[y/n]: " && read response && if [ $${response:-'n'} != 'y' ]; then \
-        echo ${C_GRN}"K.O.! container has been stopped but not destroyed."${C_END}; \
+        @echo ${C_GRN}"K.O.! container has been stopped but not destroyed."${C_END}; \
     else \
 		cd ./platforms/$(BROKER_PLTF) && $(MAKE) clear destroy; \
-		echo -n ${C_GRN}"Do you want to clear $(ENGINE) cache? "${C_END}"[y/n]: " && read response && if [ $${response:-'n'} != 'y' ]; then \
-			echo ${C_YEL}"The following command is delegated to be executed by user:"${C_END}; \
-			echo "$$ $(ENGINE_COMMAND) system prune"; \
+		@echo -n ${C_GRN}"Do you want to clear $(ENGINE) cache? "${C_END}"[y/n]: " && read response && if [ $${response:-'n'} != 'y' ]; then \
+			@echo ${C_YEL}"The following command is delegated to be executed by user:"${C_END}; \
+			@echo "$$ $(ENGINE_COMMAND) system prune"; \
 		else \
 			$(ENGINE_COMMAND) system prune -f; \
-			echo ${C_GRN}"O.K.! $(ENGINE) cache has been cleared up."${C_END}; \
+			@echo ${C_GRN}"O.K.! $(ENGINE) cache has been cleared up."${C_END}; \
 		fi \
 	fi
 
@@ -433,9 +416,9 @@ repo-flush: ## echoes clearing commands for git repository cache on local IDE
 	@echo ${C_YEL}"$$"${C_END}" git rm -rf --cached .; git add .; git commit -m \"maint: cache cleared for untracked files\""
 
 repo-commits: ## echoes common git commands
-	echo ${C_YEL}"For comment fixing over already pushed commit:"${C_END}
-	echo ${C_YEL}"$$"${C_END}" git commit --amend"
-	echo ${C_YEL}"$$"${C_END}" git push --force origin [branch]"
-	echo ""
-	echo ${C_YEL}"Common commands for creating commits:"${C_END}
-	echo ${C_YEL}"$$"${C_END}" git add . && git commit -m \"feat: ... \""
+	@echo ${C_YEL}"For comment fixing over already pushed commit:"${C_END}
+	@echo ${C_YEL}"$$"${C_END}" git commit --amend"
+	@echo ${C_YEL}"$$"${C_END}" git push --force origin [branch]"
+	@echo ""
+	@echo ${C_YEL}"Common commands for creating commits:"${C_END}
+	@echo ${C_YEL}"$$"${C_END}" git add . && git commit -m \"feat: ... \""
