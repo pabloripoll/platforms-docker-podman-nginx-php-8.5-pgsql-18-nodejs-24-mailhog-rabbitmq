@@ -1,39 +1,29 @@
 # This Makefile requires GNU Make.
 MAKEFLAGS += --silent
 
-# Settings
+# Linux / macOS / WSL2 codes for rendering colors
+C_BLU := '\033[0;34m'
+C_GRN := '\033[0;32m'
+C_RED := '\033[0;31m'
+C_YEL := '\033[0;33m'
+C_END := '\033[0m'
 
-ifeq ($(strip $(OS)),Windows_NT) # is Windows_NT on XP, 2000, 7, Vista, 10...
-    DETECTED_OS := Windows
-	C_BLU=''
-	C_GRN=''
-	C_RED=''
-	C_YEL=''
-	C_END=''
-else
-    DETECTED_OS := $(shell uname) # same as "uname -s"
-	C_BLU='\033[0;34m'
-	C_GRN='\033[0;32m'
-	C_RED='\033[0;31m'
-	C_YEL='\033[0;33m'
-	C_END='\033[0m'
-endif
-
+# Root environment constants
 include ../../.env
 
-ENGINE_PLTF="NGINX + PHP 8.5"
-ENGINE_LEAD=$(SERVICE_LEAD)
-ENGINE_CNET=$(SERVICE_CNET)
-ENGINE_HOST=$(SERVICE_HOST)
-ENGINE_IMGK=$(API_IMGK)
-ENGINE_CAAS=$(API_CAAS)
-ENGINE_PORT=$(API_PORT)
-ENGINE_BIND=$(API_BIND)
-ENGINE_CPUS=$(API_CPUS)
-ENGINE_MEMO=$(API_MEMO)
-ENGINE_SWAP=$(API_SWAP)
-ENGINE_USER=$(API_USER)
-ENGINE_GROUP=$(API_GROUP)
+ENGINE_PLTF := "NGINX + PHP 8.5"
+ENGINE_LEAD := $(SERVICE_LEAD)
+ENGINE_CNET := $(SERVICE_CNET)
+ENGINE_HOST := $(SERVICE_HOST)
+ENGINE_IMGK := $(API_IMGK)
+ENGINE_CAAS := $(API_CAAS)
+ENGINE_PORT := $(API_PORT)
+ENGINE_BIND := $(API_BIND)
+ENGINE_CPUS := $(API_CPUS)
+ENGINE_MEMO := $(API_MEMO)
+ENGINE_SWAP := $(API_SWAP)
+ENGINE_USER := $(API_USER)
+ENGINE_GROUP := $(API_GROUP)
 
 DIR_ROOT=$(patsubst %/,%,$(dir $(realpath $(firstword $(MAKEFILE_LIST)))))
 DIR_BASENAME=$(shell basename $(DIR_ROOT))
@@ -47,8 +37,8 @@ ENGINE_EXEC_SSH=$(ENGINE_COMMAND) exec -it $(ENGINE_CONTAINER) sh
 .PHONY: help
 
 help: ## shows this Makefile help message
-	echo "Usage: $$ make "${C_GRN}"[target]"${C_END}
-	echo ${C_GRN}"Targets:"${C_END}
+	@echo "Usage: $$ make "${C_GRN}"[target]"${C_END}
+	@echo ${C_GRN}"Targets:"${C_END}
 	awk 'BEGIN {FS = ":.*?## "} /^[a-zA-Z0-9_-]+:.*?## / {printf "$$ make \033[0;33m%-30s\033[0m %s\n", $$1, $$2}' ${MAKEFILE_LIST} | column -t -c 2 -s ':#'
 
 # -------------------------------------------------------------------------------------------------
@@ -57,11 +47,11 @@ help: ## shows this Makefile help message
 .PHONY: port-check
 
 port-check: ## shows this project port availability on local machine
-	echo "Checking configuration for "${C_YEL}"$(ENGINE_PLTF)"${C_END}" container:";
+	@echo "Checking configuration for "${C_YEL}"$(ENGINE_PLTF)"${C_END}" container:";
 	if [ -z "$($(ENGINE_COMMAND) lsof -i :$(ENGINE_PORT))" ]; then \
-		echo ${C_BLU}"$(ENGINE_PLTF)"${C_END}" > localhost:"${C_GRN}"$(ENGINE_PORT) is free to use."${C_END}; \
+		@echo ${C_BLU}"$(ENGINE_PLTF)"${C_END}" > localhost:"${C_GRN}"$(ENGINE_PORT) is free to use."${C_END}; \
     else \
-		echo ${C_BLU}"$(ENGINE_PLTF)"${C_END}" > localhost:"${C_RED}"$(ENGINE_PORT) is busy. Update ./.env file."${C_END}; \
+		@echo ${C_BLU}"$(ENGINE_PLTF)"${C_END}" > localhost:"${C_RED}"$(ENGINE_PORT) is busy. Update ./.env file."${C_END}; \
 	fi
 
 # -------------------------------------------------------------------------------------------------
@@ -71,16 +61,13 @@ port-check: ## shows this project port availability on local machine
 
 env: ## checks if docker .env file exists
 	if [ -f ./docker/.env ]; then \
-		echo ${C_BLU}"$(SERVICE_NAME)"${C_END}" - $(ENGINE_PLTF) "${C_YEL}"docker-compose.yml"${C_END}" .env file "${C_GRN}"is set."${C_END}; \
+		@echo ${C_BLU}"$(SERVICE_NAME)"${C_END}" - $(ENGINE_PLTF) "${C_YEL}"docker-compose.yml"${C_END}" .env file "${C_GRN}"is set."${C_END}; \
 	else \
-		echo ${C_BLU}"$(SERVICE_NAME)"${C_END}" - $(ENGINE_PLTF) "${C_YEL}"docker-compose.yml"${C_END}" .env file "${C_RED}"is not set."${C_END}" \
+		@echo ${C_BLU}"$(SERVICE_NAME)"${C_END}" - $(ENGINE_PLTF) "${C_YEL}"docker-compose.yml"${C_END}" .env file "${C_RED}"is not set."${C_END}" \
 		Create it by executing "${C_YEL}"$$ make env-set"${C_END}; \
 	fi
 
 env-set: ## sets docker .env file
-ifeq ($(DETECTED_OS), Windows)
-	echo "Recipe do not support for Windows NT at this moment - You have to manually create .env file from ./docker/.env.example";
-else
 	@echo "COMPOSE_LEAD=$(ENGINE_LEAD)" > ./docker/.env
 	@echo "COMPOSE_CNET=$(ENGINE_CNET)" >> ./docker/.env
 	@echo "COMPOSE_IMGK=$(ENGINE_IMGK)" >> ./docker/.env
@@ -95,14 +82,14 @@ else
 	@echo "COMPOSE_GROUP=$(ENGINE_GROUP)" >> ./docker/.env
 	chmod +x ./docker/config/ownerships.sh
 	./docker/config/ownerships.sh $(ENGINE_USER) $(ENGINE_GROUP)
-	echo ${C_BLU}"$(SERVICE_NAME)"${C_END}" API "${C_YEL}$(ENGINE_PLTF)${C_END}" - "${C_YEL}"docker-compose.yml"${C_END}" .env file "${C_GRN}"has been set."${C_END};
-	echo ${C_BLU}"$(SERVICE_NAME)"${C_END}" API "${C_YEL}$(ENGINE_PLTF)${C_END}" - Container name: "${C_GRN}$(ENGINE_CONTAINER)${C_END}
-	echo ${C_BLU}"$(SERVICE_NAME)"${C_END}" API "${C_YEL}$(ENGINE_PLTF)${C_END}" - Container image: "${C_GRN}$(ENGINE_CONTAINER):$(ENGINE_IMGK)${C_END}
-	echo ${C_BLU}"$(SERVICE_NAME)"${C_END}" API "${C_YEL}$(ENGINE_PLTF)${C_END}" - Max. CPUs: "${C_GRN}$(ENGINE_CPUS)${C_END}
-	echo ${C_BLU}"$(SERVICE_NAME)"${C_END}" API "${C_YEL}$(ENGINE_PLTF)${C_END}" - Max. memory: "${C_GRN}$(ENGINE_MEMO)${C_END}" - Swap: "${C_GRN}$(ENGINE_SWAP)${C_END}
-	echo ${C_BLU}"$(SERVICE_NAME)"${C_END}" API "${C_YEL}$(ENGINE_PLTF)${C_END}" - Localhost: http://127.0.0.1:"${C_GRN}"$(ENGINE_PORT)"${C_END};
-	echo ${C_BLU}"$(SERVICE_NAME)"${C_END}" API "${C_YEL}$(ENGINE_PLTF)${C_END}" - Hostname: http://$(word 1,$(shell hostname -I)):"${C_GRN}"$(ENGINE_PORT)"${C_END};
-endif
+	@echo ${C_BLU}"$(SERVICE_NAME)"${C_END}" API "${C_YEL}$(ENGINE_PLTF)${C_END}" - "${C_YEL}"docker-compose.yml"${C_END}" .env file "${C_GRN}"has been set."${C_END};
+	@echo ${C_BLU}"$(SERVICE_NAME)"${C_END}" API "${C_YEL}$(ENGINE_PLTF)${C_END}" - Container name: "${C_GRN}$(ENGINE_CONTAINER)${C_END}
+	@echo ${C_BLU}"$(SERVICE_NAME)"${C_END}" API "${C_YEL}$(ENGINE_PLTF)${C_END}" - Container image: "${C_GRN}$(ENGINE_CONTAINER):$(ENGINE_IMGK)${C_END}
+	@echo ${C_BLU}"$(SERVICE_NAME)"${C_END}" API "${C_YEL}$(ENGINE_PLTF)${C_END}" - Max. CPUs: "${C_GRN}$(ENGINE_CPUS)${C_END}
+	@echo ${C_BLU}"$(SERVICE_NAME)"${C_END}" API "${C_YEL}$(ENGINE_PLTF)${C_END}" - Max. memory: "${C_GRN}$(ENGINE_MEMO)${C_END}" - Swap: "${C_GRN}$(ENGINE_SWAP)${C_END}
+	@echo ${C_BLU}"$(SERVICE_NAME)"${C_END}" API "${C_YEL}$(ENGINE_PLTF)${C_END}" - Localhost: http://127.0.0.1:"${C_GRN}"$(ENGINE_PORT)"${C_END};
+	@echo ${C_BLU}"$(SERVICE_NAME)"${C_END}" API "${C_YEL}$(ENGINE_PLTF)${C_END}" - Hostname: http://$(word 1,$(shell hostname -I)):"${C_GRN}"$(ENGINE_PORT)"${C_END};
+
 
 # -------------------------------------------------------------------------------------------------
 #  Container
@@ -110,17 +97,17 @@ endif
 .PHONY: info ssh up build network start stop restart clear destroy dev
 
 info: ## shows container information
-	echo ${C_BLU}"$(SERVICE_NAME)"${C_END}": "${C_GRN}"$(ENGINE_PLTF)"${C_END};
-	printf ${C_YEL}"Container ID.: "${C_END}; $(ENGINE_COMMAND) ps -aqf "name=^$(ENGINE_CONTAINER)$$"; printf "%s";
-	echo ${C_YEL}"Name.........: "${C_END}$(ENGINE_CONTAINER);
-	echo ${C_YEL}"Image........: "${C_END}"$(ENGINE_CONTAINER):$(ENGINE_IMGK)";
-	echo ${C_YEL}"CPUs.........: "${C_END}"$(ENGINE_CPUS)";
-	echo ${C_YEL}"RAM..........: "${C_END}"$(ENGINE_MEMO)";
-	echo ${C_YEL}"SWAP.........: "${C_END}"$(ENGINE_SWAP)";
-	echo ${C_YEL}"Host.........: "${C_END}"$(ENGINE_HOST):$(ENGINE_PORT)";
-	echo ${C_YEL}"Hostname.....: "${C_END}"$(word 1,$(shell hostname -I)):"$(ENGINE_PORT);
-	printf ${C_YEL}"Docker.Host..: "${C_END};$(ENGINE_COMMAND) inspect -f '{{range.NetworkSettings.Networks}}{{.IPAddress}}{{end}}' $(ENGINE_CONTAINER);
-	printf ${C_YEL}"NetworkID....: "${C_END};$(ENGINE_COMMAND) inspect -f '{{range.NetworkSettings.Networks}}{{.NetworkID}}{{end}}' $(ENGINE_CONTAINER);
+	@echo "$(SERVICE_NAME): "${C_GRN}"$(ENGINE_PLTF)"${C_END};
+	@CID=$$($(ENGINE_COMMAND) ps -aqf "name=^$(ENGINE_CONTAINER)$$"); echo ${C_YEL}"Container ID.: "${C_END}"$${CID:-null}";
+	@echo ${C_YEL}"Name.........: "${C_END}$(ENGINE_CONTAINER);
+	@echo ${C_YEL}"Image........: "${C_END}"$(ENGINE_CONTAINER):$(ENGINE_IMGK)";
+	@echo ${C_YEL}"CPUs.........: "${C_END}"$(ENGINE_CPUS)";
+	@echo ${C_YEL}"RAM..........: "${C_END}"$(ENGINE_MEMO)";
+	@echo ${C_YEL}"SWAP.........: "${C_END}"$(ENGINE_SWAP)";
+	@echo ${C_YEL}"Host.........: "${C_END}"$(ENGINE_HOST):$(ENGINE_PORT)";
+	@echo ${C_YEL}"Hostname.....: "${C_END}"$(word 1,$(shell hostname -I)):"$(ENGINE_PORT);
+	@DIP=$$($(ENGINE_COMMAND) inspect -f '{{range.NetworkSettings.Networks}}{{.IPAddress}}{{end}}' $(ENGINE_CONTAINER) 2>/dev/null); echo ${C_YEL}"Docker.Host..: "${C_END}"$${DIP:-null}";
+	@NID=$$($(ENGINE_COMMAND) inspect -f '{{range.NetworkSettings.Networks}}{{.NetworkID}}{{end}}' $(ENGINE_CONTAINER) 2>/dev/null); echo ${C_YEL}"NetworkID....: "${C_END}"$${NID:-null}";
 
 ssh: ## enters the container shell
 	$(ENGINE_EXEC_SSH)
