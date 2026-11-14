@@ -164,10 +164,10 @@ supervisord-update: ## updates supervisord services without the need of stoping 
 .PHONY: nginx-conf nginx-update nginx-default-conf nginx-default-update
 
 nginx-conf: ## shows nginx configuration set on the running container
-	$(ENGINE_COMMAND) exec -i $(ENGINE_CAAS) sh -c 'cat /etc/nginx/conf.d/default.conf'
+	$(ENGINE_COMMAND) exec -i $(ENGINE_CAAS) sh -c 'cat /etc/nginx/nginx.conf'
 
 nginx-update: ## updates nginx configuration without the need of stoping or rebuilding the container
-	$(ENGINE_COMMAND) cp container/config/nginx/nginx.conf $(ENGINE_CAAS):/etc/nginx/conf.d/default.conf
+	$(ENGINE_COMMAND) cp container/config/nginx/nginx.conf $(ENGINE_CAAS):/etc/nginx/nginx.conf
 
 nginx-default-conf: ## shows nginx default server block set on the running container
 	$(ENGINE_COMMAND) exec -i $(ENGINE_CAAS) sh -c 'cat /etc/nginx/conf.d/default.conf'
