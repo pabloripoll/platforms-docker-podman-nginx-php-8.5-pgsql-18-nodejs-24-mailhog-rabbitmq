@@ -8,9 +8,13 @@ C_RED := '\033[0;31m'
 C_YEL := '\033[0;33m'
 C_END := '\033[0m'
 
-# Root environment constants
+DIR_ROOT=$(patsubst %/,%,$(dir $(realpath $(firstword $(MAKEFILE_LIST)))))
+DIR_BASENAME=$(shell basename $(DIR_ROOT))
+
+# Root environment variables
 include ../../.env
 
+# Container environment variables
 ENGINE_PLTF := "NGINX + PHP 8.5"
 ENGINE_LEAD := $(SERVICE_LEAD)
 ENGINE_SLUG := $(SERVICE_SLUG)
@@ -25,9 +29,6 @@ ENGINE_MEMO := $(API_MEMO)
 ENGINE_SWAP := $(API_SWAP)
 ENGINE_USER := $(API_USER)
 ENGINE_GROUP := $(API_GROUP)
-
-DIR_ROOT=$(patsubst %/,%,$(dir $(realpath $(firstword $(MAKEFILE_LIST)))))
-DIR_BASENAME=$(shell basename $(DIR_ROOT))
 
 # -------------------------------------------------------------------------------------------------
 #  Help
@@ -97,6 +98,7 @@ info: ## shows container information
 	if [ -f ./container/.env ]; then \
 		echo ${C_YEL}"Project......: "${C_END}"$(SERVICE_NAME)"; \
 		echo ${C_YEL}"Platform.....: "${C_END}"$(ENGINE_PLTF)"; \
+		echo ${C_YEL}"Directory....: "${C_END}"platforms/$(DIR_BASENAME)"; \
 		CID=$$($(ENGINE_COMMAND) ps -aqf "name=^$(ENGINE_CAAS)$$"); echo ${C_YEL}"Container ID.: "${C_END}"$${CID:-null}"; \
 		echo ${C_YEL}"Name.........: "${C_END}"$(ENGINE_CAAS)"; \
 		echo ${C_YEL}"Image........: "${C_END}"$(ENGINE_CAAS):$(ENGINE_IMGK)"; \
