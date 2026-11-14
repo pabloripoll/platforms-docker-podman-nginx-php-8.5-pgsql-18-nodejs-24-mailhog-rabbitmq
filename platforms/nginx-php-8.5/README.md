@@ -12,6 +12,8 @@
 
 ## <a id="features"></a>Features
 
+![Docker](https://shields.io/badge/docker-%230db7ed.svg?style=for-the-badge&logo=docker&logoColor=white)
+![Podman](https://shields.io/badge/-Podman-892CA0?style=for-the-badge&logo=podman&logoColor=white)
 ![Alpine Linux](https://shields.io/badge/Alpine_Linux-%230D597F.svg?style=for-the-badge&logo=alpine-linux&logoColor=white)
 ![Debian](https://shields.io/badge/debian-red?style=for-the-badge&logo=debian&logoColor=orange&color=darkred)
 ![Nginx](https://shields.io/badge/nginx-%23009639.svg?style=for-the-badge&logo=nginx&logoColor=white)
@@ -80,26 +82,27 @@ Before using containers from this repository in any production environment:
 
 There is a dedicated GNU Make file and the main Docker directory with the required scripts to build the required platform configuration.
 
-This service platform is designed to be managed by a parent `./../../.env` but, as it feeds `./docker/.env` through GNU Make, it can be edited manually.
+This service platform is designed to be managed by a parent `./../../.env` but, as it feeds `./container/.env` through GNU Make, it can be edited manually.
 
-If no GNU Make is in used, create a copy from the example `./docker/.env.example` into `./docker/.env`.
+If no GNU Make is in used, create a copy from the example `./container/.env.example` into `./container/.env`.
 
-The service container can be easily manage by the `./docker/docker-compose.yml`.
+The service container can be easily manage by the `./container/docker-compose.yml`.
 
-Require environment variables at `./docker/.env` *(all are customizable)*:
+Require environment variables at `./container/.env` *(all are customizable)*:
 ```bash
-COMPOSE_LEAD=myproj                             # <- lead abbreviation or acronym as part of related containers naming rule -------------------------> #
-COMPOSE_CNET=mp-dev                             # <- useful for networking to connect between containers --------------------------------------------> #
-COMPOSE_IMGK=alpine-3.24-nginx-php-8.3          # <- real main image keys to manage automations for sharing resources -------------------------------> #
-COMPOSE_NAME=mp-api-dev                         # <- container name to build the service - it is important to set the environment in this variable --> #
-COMPOSE_HOST=127.0.0.1                          # <- machine hostname referrer - not necessary for this project -------------------------------------> #
-COMPOSE_PORT=7501                               # <- local machine port opened for container service ------------------------------------------------> #
-COMPOSE_BIND="../../../api-rest"                # <- path where application is binded from container to local ---------------------------------------> #
-COMPOSE_CPUS=2.00                               # <- container's maximum CPUs usage to apply by docker-compose - leave it empty for full usage ------> #
-COMPOSE_MEMO=128M                               # <- container's maximum CPUs usage to apply by docker-compose - leave it empty for full usage ------> #
-COMPOSE_SWAP=256M                               # <- container's maximum RAM usage to apply by docker-compose ---------------------------------------> #
-COMPOSE_USER=osuser                             # <- container's project directory user -------------------------------------------------------------> #
-COMPOSE_GROUP=osgroup                           # <- container's project directory group ------------------------------------------------------------> #
+COMPOSE_LEAD=myproj                                 # <- lead abbreviation or acronym as part of related containers naming rule -------------------------> #
+COMPOSE_SLUG=dev                                    # <- instance/branch identifier (e.g., dev_a, dev_b) as part of the related containers naming rule --> #
+COMPOSE_CNET=$(COMPOSE_LEAD)-net-$(COMPOSE_SLUG)    # <- useful for networking to connect between containers --------------------------------------------> #
+COMPOSE_IMGK=alpine-3.24-nginx-php-8.5              # <- real main image keys to manage automations for sharing resources -------------------------------> #
+COMPOSE_CAAS=$(COMPOSE_LEAD)-api-$(COMPOSE_SLUG)    # <- container name to build container as a service - container name --------------------------------> #
+COMPOSE_HOST=127.0.0.1                              # <- machine hostname referrer - not necessary for this project -------------------------------------> #
+COMPOSE_PORT=7501                                   # <- local machine port opened for container service ------------------------------------------------> #
+COMPOSE_BIND="../../../api-rest"                    # <- path where application is binded from container to local ---------------------------------------> #
+COMPOSE_CPUS=2.00                                   # <- container's maximum CPUs usage to apply by docker-compose - leave it empty for full usage ------> #
+COMPOSE_MEMO=128M                                   # <- container's maximum CPUs usage to apply by docker-compose - leave it empty for full usage ------> #
+COMPOSE_SWAP=256M                                   # <- container's maximum RAM usage to apply by docker-compose ---------------------------------------> #
+COMPOSE_USER=osuser                                 # <- container's project directory user -------------------------------------------------------------> #
+COMPOSE_GROUP=osgroup                               # <- container's project directory group ------------------------------------------------------------> #
 ```
 
 <font color="orange"><b>IMPORTANT:</b></font>
@@ -111,7 +114,7 @@ Although the project aims to keep platform settings consistent across machines, 
 ### Containers Access Modes
 
 - If no application is on `./api-rest` directory *(or your custom binded directory name)* once container is up it wont provide a application and therefore NGINX will respond with an error. Copy an start-up example application or create a parking page.
-- Set the required environment values in `./docker/.env` from `./docker/.env.example` if no GNU Make will be applied.
+- Set the required environment values in `./container/.env` from `./container/.env.example` if no GNU Make will be applied.
 - Set the required configuration files by coping and updating them depending on your project requirements.
 - Container availability by building the container with `docker-composer.yml` in separated configuration layers
     - Stand-alone
@@ -134,7 +137,7 @@ Although the project aims to keep platform settings consistent across machines, 
 
 You might be using this repository with different databases connection. Copy from sample and set the correct packages and modules required by commenting them out, and others not required is recommended to be commented. In this way, the container will be built only with the neccessary settings an in less time
 
-- `./docker/Dockerfile.Alpine` -> `./docker/Dockerfile`
+- `./container/Dockerfile.Alpine` -> `./container/Dockerfile`
 
 Optionally, the platform directory could come with a Dockerfile with Debian version in case of AI preference usage.
 
@@ -142,14 +145,14 @@ Optionally, the platform directory could come with a Dockerfile with Debian vers
 
 The default example is a server block for a REST API, but it can be use for webapps too
 
-- `./docker/config/nginx/conf.d-sample/default.conf` -> `./docker/config/nginx/conf.d/default.conf`
+- `./container/config/nginx/conf.d-sample/default.conf` -> `./container/config/nginx/conf.d/default.conf`
 
 ### PHP
 
 These are the default PHP settings. Copy them all with the proper configuration required for your project
 
-- `./docker/config/nginx/conf.d-sample/fpm-pool.conf` -> `./docker/config/nginx/conf.d/fpm-pool.conf`
-- `./docker/config/php/conf.d-sample/php.ini` -> `./docker/config/php/conf.d/php.ini`
+- `./container/config/nginx/conf.d-sample/fpm-pool.conf` -> `./container/config/nginx/conf.d/fpm-pool.conf`
+- `./container/config/php/conf.d-sample/php.ini` -> `./container/config/php/conf.d/php.ini`
 
 ```bash
 # Memory limit
@@ -158,7 +161,7 @@ memory_limit = 128M # must be equal or less than container max memory usage
 
 To automatically run the PHP application, create the Supervisord service that runs the application. You can choose the dev or production version, and set it according to your project requirements
 
-- `./docker/config/supervisor/conf.d-sample/php-fpm.conf` -> `./docker/config/supervisor/conf.d/php-fpm.conf`
+- `./container/config/supervisor/conf.d-sample/php-fpm.conf` -> `./container/config/supervisor/conf.d/php-fpm.conf`
 
 ```bash
 [program:php-fpm]
@@ -174,15 +177,15 @@ startretries=0
 <br>
 
 To support environment-specific differences, there is a sample supervisor configuration directory:
-`./platform/nginx-php-8.5/docker/config/supervisor/conf.d-sample`
+`./platform/nginx-php-8.5/container/config/supervisor/conf.d-sample`
 
 Before building the container you must copy that directory to:
-`./platform/nginx-php-8.5/docker/config/supervisor/conf.d`
+`./platform/nginx-php-8.5/container/config/supervisor/conf.d`
 
 Make sure the copied conf.d contains at least the service files needed to run Nginx and PHP-FPM (for example, supervisor program entries for nginx and php-fpm).
 
 ```bash
-$ cd ./platform/nginx-php-8.5/docker/config/supervisor
+$ cd ./platform/nginx-php-8.5/container/config/supervisor
 $ cp -vn conf.d-sample/nginx.conf conf.d-sample/php-fpm.conf conf.d/
 'conf.d-sample/nginx.conf' -> 'conf.d/nginx.conf'
 'conf.d-sample/php-fpm.conf' -> 'conf.d/php-fpm.conf'
@@ -201,8 +204,7 @@ Usage: $ make [target]
 Targets:
 $ make help                           shows this Makefile help message
 $ make port-check                     shows this project port availability on local machine
-$ make env                            checks if docker .env file exists
-$ make env-set                        sets docker .env file
+$ make env-set                        sets container .env file
 $ make info                           shows container information
 $ make ssh                            enters the container shell
 $ make up                             starts and recreates containers if compose config or image changed, runnning in detached mode

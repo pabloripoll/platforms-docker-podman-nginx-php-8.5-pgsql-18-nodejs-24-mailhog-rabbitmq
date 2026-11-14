@@ -102,25 +102,26 @@ web-down: ## stops and removes the container, network and volume established
 	@echo ${C_RED}"Attention!"${C_END};
 	@echo ${C_YEL}"You're about to stop and remove the "${C_BLU}"$(WEBAPP_PLTF)"${C_END}" container with its network and volume."${C_END};
 	@echo -n ${C_RED}"Are you sure to proceed? "${C_END}"[y/n]: " && read response && if [ $${response:-'n'} != 'y' ]; then \
-        @echo ${C_GRN}"O.K.! container continues with its latest status."${C_END}; \
+        echo ${C_GRN}"O.K.! $(WEBAPP_CAAS) container continues with its latest status."${C_END}; \
     else \
 		cd ./platforms/$(WEBAPP_PLTF) && $(MAKE) clear; \
-		@echo ${C_GRN}"O.K.! $(WEBAPP_PLTF) has been down and cleared."${C_END}; \
+		echo ${C_GRN}"O.K.! $(WEBAPP_CAAS) container has been down and cleared."${C_END}; \
 	fi
 
 web-destroy: ## destroys completely the container with its data
 	@echo ${C_RED}"Attention!"${C_END};
 	@echo ${C_YEL}"You're about to remove the "${C_BLU}"$(WEBAPP_PLTF)"${C_END}" container and delete its image resource."${C_END};
 	@echo -n ${C_RED}"Are you sure to proceed? "${C_END}"[y/n]: " && read response && if [ $${response:-'n'} != 'y' ]; then \
-        @echo ${C_GRN}"O.K.! container continues with its latest status."${C_END}; \
+        @echo ${C_GRN}"O.K.! $(WEBAPP_CAAS) container continues with its latest status."${C_END}; \
     else \
 		cd ./platforms/$(WEBAPP_PLTF) && $(MAKE) clear destroy; \
-		@echo -n ${C_GRN}"Do you want to clear $(ENGINE) cache? "${C_END}"[y/n]: " && read response && if [ $${response:-'n'} != 'y' ]; then \
-			@echo ${C_YEL}"The following command is delegated to be executed by user:"${C_END}; \
-			@echo "$$ $(ENGINE_COMMAND) system prune"; \
+		echo ${C_GRN}"O.K.! $(WEBAPP_CAAS) container has been down and cleared."${C_END}; \
+		echo -n ${C_YEL}"Do you want to clear $(ENGINE) cache? "${C_END}"[y/n]: " && read response && if [ $${response:-'n'} != 'y' ]; then \
+			echo ${C_YEL}"The following command is delegated to be executed by user:"${C_END}; \
+			echo "$$ $(ENGINE_COMMAND) system prune"; \
 		else \
 			$(ENGINE_COMMAND) system prune -f; \
-			@echo ${C_GRN}"O.K.! $(ENGINE) cache has been cleared up."${C_END}; \
+			echo ${C_GRN}"O.K.! $(ENGINE) cache has been cleared up."${C_END}; \
 		fi \
 	fi
 
@@ -167,25 +168,26 @@ api-down: ## stops and removes the container, network and volume established
 	@echo ${C_RED}"Attention!"${C_END};
 	@echo ${C_YEL}"You're about to stop and remove the "${C_BLU}"$(API_PLTF)"${C_END}" container with its network and volume."${C_END};
 	@echo -n ${C_RED}"Are you sure to proceed? "${C_END}"[y/n]: " && read response && if [ $${response:-'n'} != 'y' ]; then \
-        @echo ${C_GRN}"O.K.! container continues with its latest status."${C_END}; \
+        echo ${C_GRN}"O.K.! $(API_CAAS) container continues with its latest status."${C_END}; \
     else \
 		cd ./platforms/$(API_PLTF) && $(MAKE) clear; \
-		@echo ${C_GRN}"O.K.! $(API_PLTF) has been down and cleared."${C_END}; \
+		echo ${C_GRN}"O.K.! $(API_CAAS) container has been down and cleared."${C_END}; \
 	fi
 
 api-destroy: ## destroys completely the container with its data
 	@echo ${C_RED}"Attention!"${C_END};
 	@echo ${C_YEL}"You're about to remove the "${C_BLU}"$(API_PLTF)"${C_END}" container and delete its image resource."${C_END};
 	@echo -n ${C_RED}"Are you sure to proceed? "${C_END}"[y/n]: " && read response && if [ $${response:-'n'} != 'y' ]; then \
-        @echo ${C_GRN}"O.K.! container continues with its latest status."${C_END}; \
+        echo ${C_GRN}"O.K.! $(API_CAAS) container continues with its latest status."${C_END}; \
     else \
 		cd ./platforms/$(API_PLTF) && $(MAKE) clear destroy; \
-		@echo -n ${C_GRN}"Do you want to clear $(ENGINE) cache? "${C_END}"[y/n]: " && read response && if [ $${response:-'n'} != 'y' ]; then \
-			@echo ${C_YEL}"The following command is delegated to be executed by user:"${C_END}; \
-			@echo "$$ $(ENGINE_COMMAND) system prune"; \
+		echo ${C_GRN}"O.K.! $(API_CAAS) container has been down and cleared."${C_END}; \
+		echo -n ${C_YEL}"Do you want to clear $(ENGINE) cache? "${C_END}"[y/n]: " && read response && if [ $${response:-'n'} != 'y' ]; then \
+			echo ${C_YEL}"The following command is delegated to be executed by user:"${C_END}; \
+			echo "$$ $(ENGINE_COMMAND) system prune"; \
 		else \
 			$(ENGINE_COMMAND) system prune -f; \
-			@echo ${C_GRN}"O.K.! $(ENGINE) cache has been cleared up."${C_END}; \
+			echo ${C_GRN}"O.K.! $(ENGINE) cache has been cleared up."${C_END}; \
 		fi \
 	fi
 
@@ -228,27 +230,28 @@ db-down: ## stops and removes the container, network and volume established
 	@echo ${C_RED}"Attention!"${C_END};
 	@echo ${C_YEL}"You're about to stop and remove the "${C_BLU}"$(DATABASE_PLTF)"${C_END}" container with its network and volume."${C_END};
 	@echo -n ${C_RED}"Are you sure to proceed? "${C_END}"[y/n]: " && read response && if [ $${response:-'n'} != 'y' ]; then \
-        @echo ${C_GRN}"O.K.! container continues with its latest status."${C_END}; \
+        echo ${C_GRN}"O.K.! $(DATABASE_CAAS) container continues with its latest status."${C_END}; \
     else \
 		cd ./platforms/$(DATABASE_PLTF) && $(MAKE) clear; \
-		@echo ${C_GRN}"O.K.! $(DATABASE_PLTF) has been down and cleared."${C_END}; \
+		echo ${C_GRN}"O.K.! $(DATABASE_CAAS) container has been down and cleared."${C_END}; \
 	fi
 
 db-destroy: ## destroys completely the container with its data
 	@echo ${C_RED}"Attention!"${C_END};
 	@echo ${C_YEL}"You're about to remove the "${C_BLU}"$(DATABASE_PLTF)"${C_END}" container and delete its image resource and persistance data."${C_END};
 	@echo -n ${C_RED}"Are you sure to proceed? "${C_END}"[y/n]: " && read response && if [ $${response:-'n'} != 'y' ]; then \
-        @echo ${C_GRN}"O.K.! container continues with its latest status."${C_END}; \
+        @echo ${C_GRN}"O.K.! $(DATABASE_CAAS) container continues with its latest status."${C_END}; \
     else \
 		cd ./platforms/$(DATABASE_PLTF) && $(MAKE) clear destroy; \
-		@echo -n ${C_GRN}"Do you want to clear $(ENGINE) cache? "${C_END}"[y/n]: " && read response && if [ $${response:-'n'} != 'y' ]; then \
-			@echo ${C_YEL}"The following commands are delegated to be executed by user:"${C_END}; \
-			@echo "$$ $(ENGINE_COMMAND) system prune"; \
-			@echo "$$ $(ENGINE_COMMAND) volume prune"; \
+		echo ${C_GRN}"O.K.! $(DATABASE_CAAS) container has been down and cleared."${C_END}; \
+		@echo -n ${C_YEL}"Do you want to clear $(ENGINE) cache? "${C_END}"[y/n]: " && read response && if [ $${response:-'n'} != 'y' ]; then \
+			echo ${C_YEL}"The following commands are delegated to be executed by user:"${C_END}; \
+			echo "$$ $(ENGINE_COMMAND) system prune"; \
+			echo "$$ $(ENGINE_COMMAND) volume prune"; \
 		else \
 			$(ENGINE_COMMAND) system prune -f; \
 			$(ENGINE_COMMAND) volume prune -f; \
-			@echo ${C_GRN}"O.K.! $(ENGINE) cache has been cleared up."${C_END}; \
+			echo ${C_GRN}"O.K.! $(ENGINE) cache has been cleared up."${C_END}; \
 		fi \
 	fi
 
@@ -317,25 +320,26 @@ mailer-down: ## stops and removes the container, network and volume established
 	@echo ${C_RED}"Attention!"${C_END};
 	@echo ${C_YEL}"You're about to stop and remove the "${C_BLU}"$(MAILER_PLTF)"${C_END}" container with its network and volume."${C_END};
 	@echo -n ${C_RED}"Are you sure to proceed? "${C_END}"[y/n]: " && read response && if [ $${response:-'n'} != 'y' ]; then \
-        @echo ${C_GRN}"K.O.! container continues with its latest status."${C_END}; \
+        echo ${C_GRN}"K.O.! $(MAILER_CAAS) container continues with its latest status."${C_END}; \
     else \
 		cd ./platforms/$(MAILER_PLTF) && $(MAKE) clear; \
-		@echo ${C_GRN}"O.K.! $(MAILER_PLTF) has been down and cleared."${C_END}; \
+		echo ${C_GRN}"O.K.! $(MAILER_CAAS) container has been down and cleared."${C_END}; \
 	fi
 
 mailer-destroy: ## destroys completely the container with its data
 	@echo ${C_RED}"Attention!"${C_END};
 	@echo ${C_YEL}"You're about to remove the "${C_BLU}"$(MAILER_PLTF)"${C_END}" container and delete its image resource."${C_END};
 	@echo -n ${C_RED}"Are you sure to proceed? "${C_END}"[y/n]: " && read response && if [ $${response:-'n'} != 'y' ]; then \
-        @echo ${C_GRN}"O.K.! container continues with its latest status."${C_END}; \
+        echo ${C_GRN}"O.K.! $(MAILER_CAAS) container continues with its latest status."${C_END}; \
     else \
 		cd ./platforms/$(MAILER_PLTF) && $(MAKE) clear destroy; \
-		@echo -n ${C_GRN}"Do you want to clear $(ENGINE) cache? "${C_END}"[y/n]: " && read response && if [ $${response:-'n'} != 'y' ]; then \
-			@echo ${C_YEL}"The following command is delegated to be executed by user:"${C_END}; \
-			@echo "$$ $(ENGINE_COMMAND) system prune"; \
+		echo ${C_GRN}"O.K.! $(MAILER_CAAS) container has been down and cleared."${C_END}; \
+		@echo -n ${C_YEL}"Do you want to clear $(ENGINE) cache? "${C_END}"[y/n]: " && read response && if [ $${response:-'n'} != 'y' ]; then \
+			echo ${C_YEL}"The following command is delegated to be executed by user:"${C_END}; \
+			echo "$$ $(ENGINE_COMMAND) system prune"; \
 		else \
 			$(ENGINE_COMMAND) system prune -f; \
-			@echo ${C_GRN}"O.K.! $(ENGINE) cache has been cleared up."${C_END}; \
+			echo ${C_GRN}"O.K.! $(ENGINE) cache has been cleared up."${C_END}; \
 		fi \
 	fi
 
@@ -378,25 +382,26 @@ broker-down: ## stops and removes the container, network and volume established
 	@echo ${C_RED}"Attention!"${C_END};
 	@echo ${C_YEL}"You're about to stop and remove the "${C_BLU}"$(BROKER_PLTF)"${C_END}" container with its network and volume."${C_END};
 	@echo -n ${C_RED}"Are you sure to proceed? "${C_END}"[y/n]: " && read response && if [ $${response:-'n'} != 'y' ]; then \
-        @echo ${C_GRN}"O.K.! container continues with its latest status."${C_END}; \
+        echo ${C_GRN}"O.K.! $(BROKER_CAAS) container continues with its latest status."${C_END}; \
     else \
 		cd ./platforms/$(BROKER_PLTF) && $(MAKE) clear; \
-		@echo ${C_GRN}"O.K.! $(BROKER_PLTF) has been down and cleared."${C_END}; \
+		echo ${C_GRN}"O.K.! $(BROKER_CAAS) container has been down and cleared."${C_END}; \
 	fi
 
 broker-destroy: ## destroys completely the container with its data
 	@echo ${C_RED}"Attention!"${C_END};
 	@echo ${C_YEL}"You're about to remove the "${C_BLU}"$(BROKER_PLTF)"${C_END}" container and delete its image resource."${C_END};
 	@echo -n ${C_RED}"Are you sure to proceed? "${C_END}"[y/n]: " && read response && if [ $${response:-'n'} != 'y' ]; then \
-        @echo ${C_GRN}"K.O.! container has been stopped but not destroyed."${C_END}; \
+        echo ${C_GRN}"K.O.! $(BROKER_CAAS) container has been stopped but not destroyed."${C_END}; \
     else \
 		cd ./platforms/$(BROKER_PLTF) && $(MAKE) clear destroy; \
-		@echo -n ${C_GRN}"Do you want to clear $(ENGINE) cache? "${C_END}"[y/n]: " && read response && if [ $${response:-'n'} != 'y' ]; then \
-			@echo ${C_YEL}"The following command is delegated to be executed by user:"${C_END}; \
-			@echo "$$ $(ENGINE_COMMAND) system prune"; \
+		echo ${C_GRN}"O.K.! $(BROKER_CAAS) container continues with its latest status."${C_END}; \
+		@echo -n ${C_YEL}"Do you want to clear $(ENGINE) cache? "${C_END}"[y/n]: " && read response && if [ $${response:-'n'} != 'y' ]; then \
+			echo ${C_YEL}"The following command is delegated to be executed by user:"${C_END}; \
+			echo "$$ $(ENGINE_COMMAND) system prune"; \
 		else \
 			$(ENGINE_COMMAND) system prune -f; \
-			@echo ${C_GRN}"O.K.! $(ENGINE) cache has been cleared up."${C_END}; \
+			echo ${C_GRN}"O.K.! $(ENGINE) cache has been cleared up."${C_END}; \
 		fi \
 	fi
 

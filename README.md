@@ -269,7 +269,7 @@ Once variables are set, each Docker platform container environment variables can
 
 - Setup the API container
   ```bash
-  $ make apirest-set
+  $ make api-set
   ```
   **Remember**: *the `./api-rest` directory name is custimizable for binding between the container and local machine.*
 
@@ -300,7 +300,7 @@ Once variables are set, each Docker platform container environment variables can
 
 - Create and startup the API container
   ```bash
-  $ make apirest-create
+  $ make api-create
   ```
   You can test the container by visiting localhost + assigned port
 <br>
@@ -325,7 +325,7 @@ Once variables are set, each Docker platform container environment variables can
 
 Remember to use `make help` command to see all available receipes, so you can execute multiple platforms recipes at once as the following example:
 ```bash
-$ yes | make webapp-destroy apirest-destroy db-destroy mailer-destroy broker-destroy
+$ yes | make webapp-destroy api-destroy db-destroy mailer-destroy broker-destroy
 ```
 
 Execute the Docker ps command to see the containers that are up and running.
@@ -335,7 +335,7 @@ $ sudo docker ps
 
 If someone has failed, from the list you can see the the container logs to review the possible issue with it. E.g.:
 ```bash
-$ make apirest-info # displays container information
+$ make api-info # displays container information
 
 $ sudo docker logs [container-name]
 ```

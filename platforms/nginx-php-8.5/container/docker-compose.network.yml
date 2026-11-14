@@ -1,6 +1,6 @@
 services:
 
-  apirest:
+  api:
     ports:
       - ${COMPOSE_HOST}:${COMPOSE_PORT}:80
     networks:
