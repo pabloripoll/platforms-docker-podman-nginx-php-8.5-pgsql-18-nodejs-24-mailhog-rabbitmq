@@ -14,7 +14,7 @@ fi
 # Update Supervisord configuration
 if [ ! -e supervisor/supervisord.conf ]; then
     # Update chown in [unix_http_server] section
-    sed -i "s/^chown=.*/chown=${USER}:${GROUP}/" ./docker/config/supervisor/supervisord.conf
+    sed -i "s/^chown=.*/chown=${USER}:${GROUP}/" ./container/config/supervisor/supervisord.conf
 else
-    echo "WARNING: ./docker/config/supervisor/supervisord.conf not found"
+    echo "WARNING: ./container/config/supervisor/supervisord.conf not found"
 fi

@@ -1,6 +1,6 @@
 services:
 
-  apirest:
+  webapp:
     ports:
       - ${COMPOSE_HOST}:${COMPOSE_PORT}:80
     extra_hosts:

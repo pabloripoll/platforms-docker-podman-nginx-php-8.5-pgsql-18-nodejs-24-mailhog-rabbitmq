@@ -1,7 +1,7 @@
 services:
 
-  apirest:
-    image: ${COMPOSE_LEAD}-${COMPOSE_NAME}:${COMPOSE_IMGK}
+  webapp:
+    image: ${COMPOSE_CAAS}:${COMPOSE_IMGK}
     pull_policy: never
     build:
       context: ./
@@ -11,10 +11,10 @@ services:
         - GID=${GID:-1000}
         - USER=${COMPOSE_USER}
         - GROUP=${COMPOSE_GROUP}
-    container_name: ${COMPOSE_LEAD}-${COMPOSE_NAME}
+    container_name: ${COMPOSE_CAAS}
     volumes:
       - type: bind
-        source: ${COMPOSE_PATH}
+        source: ${COMPOSE_BIND}
         target: /var/www
     deploy:
       resources:
