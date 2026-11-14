@@ -80,13 +80,14 @@ env-set: ## sets container .env file
 	@echo "COMPOSE_GROUP=$(ENGINE_GROUP)" >> container/.env
 	chmod +x container/config/ownerships.sh
 	container/config/ownerships.sh $(ENGINE_USER) $(ENGINE_GROUP)
-	@echo ${C_BLU}"$(SERVICE_NAME)"${C_END}" API "${C_YEL}$(ENGINE_PLTF)${C_END}" - "${C_YEL}"docker-compose.yml"${C_END}" .env file "${C_GRN}"has been set."${C_END};
-	@echo ${C_BLU}"$(SERVICE_NAME)"${C_END}" API "${C_YEL}$(ENGINE_PLTF)${C_END}" - Container name: "${C_GRN}$(ENGINE_CAAS)${C_END}
-	@echo ${C_BLU}"$(SERVICE_NAME)"${C_END}" API "${C_YEL}$(ENGINE_PLTF)${C_END}" - Container image: "${C_GRN}$(ENGINE_CAAS):$(ENGINE_IMGK)${C_END}
-	@echo ${C_BLU}"$(SERVICE_NAME)"${C_END}" API "${C_YEL}$(ENGINE_PLTF)${C_END}" - Max. CPUs: "${C_GRN}$(ENGINE_CPUS)${C_END}
-	@echo ${C_BLU}"$(SERVICE_NAME)"${C_END}" API "${C_YEL}$(ENGINE_PLTF)${C_END}" - Max. memory: "${C_GRN}$(ENGINE_MEMO)${C_END}" - Swap: "${C_GRN}$(ENGINE_SWAP)${C_END}
-	@echo ${C_BLU}"$(SERVICE_NAME)"${C_END}" API "${C_YEL}$(ENGINE_PLTF)${C_END}" - Localhost: 127.0.0.1:"${C_GRN}"$(ENGINE_PORT)"${C_END};
-	@echo ${C_BLU}"$(SERVICE_NAME)"${C_END}" API "${C_YEL}$(ENGINE_PLTF)${C_END}" - Hostname: $(word 1,$(shell hostname -I)):"${C_GRN}"$(ENGINE_PORT)"${C_END};
+	@echo ${C_BLU}"$(SERVICE_NAME)"${C_END}" API "${C_YEL}$(ENGINE_PLTF)${C_END}" .env file "${C_GRN}"has been set."${C_END};
+	@echo "Directory..........: "${C_GRN}"platforms/$(DIR_BASENAME)"${C_END}
+	@echo "Container name.....: "${C_GRN}$(ENGINE_CAAS)${C_END}
+	@echo "Container image....: "${C_GRN}$(ENGINE_CAAS):$(ENGINE_IMGK)${C_END}
+	@echo "Max. CPUs..........: "${C_GRN}$(ENGINE_CPUS)${C_END}
+	@echo "Max. memory / Swap.: "${C_GRN}$(ENGINE_MEMO)${C_END}" / "${C_GRN}$(ENGINE_SWAP)${C_END}
+	@echo "Localhost..........: 127.0.0.1:"${C_GRN}"$(ENGINE_PORT)"${C_END};
+	@echo "Hostname...........: $(word 1,$(shell hostname -I)):"${C_GRN}"$(ENGINE_PORT)"${C_END};
 
 
 # -------------------------------------------------------------------------------------------------
