@@ -222,7 +222,7 @@ $ podman machine start
 
 ## <a id="containers-networking"></a>Containers Networking - Access Modes
 
-- If no application is on *e.g.* `./service/api-rest` directory *(or your custom binded directory name)* once container is up it wont provide a application and therefore NGINX will respond with an error. Copy an start-up example application or create a parking page.
+- If no application is on *e.g.* `./services/api-rest` directory *(or your custom binded directory name)* once container is up it wont provide a application and therefore NGINX will respond with an error. Copy an start-up example application or create a parking page.
 
 - Each container have a directory to set the required environment values in `./docker/.env` from `./docker/.env.example` if no GNU Make will be applied.
 
@@ -328,7 +328,7 @@ Remember to use `make help` command to see all available receipes, so you can ex
 $ yes | make webapp-destroy api-destroy db-destroy mailer-destroy broker-destroy
 ```
 
-Execute the Docker ps command to see the containers that are up and running.
+Execute the Docker/Podman command to see the containers that are up and running.
 ```bash
 $ sudo docker ps
 ```
@@ -449,9 +449,9 @@ To reuse any of the `./services` directory to install your desired repository in
 
 > Git commands can be executed **whether from inside the container or on the local machine**.
 
-- Remove `./service/api-rest` from local and git cache:
+- Remove `./services/api-rest` from local and git cache:
   ```bash
-  $ git rm -r --cached -- "service/api-rest/*" ":(exclude)service/api-rest/.gitkeep"
+  $ git rm -r --cached -- "services/api-rest/*" ":(exclude)services/api-rest/.gitkeep"
   $ git clean -fd
   $ git reset --hard
   $ git commit -m "maint: service api-rest directory and its default installation removed"
