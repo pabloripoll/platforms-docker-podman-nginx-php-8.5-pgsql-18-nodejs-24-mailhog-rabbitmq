@@ -250,7 +250,9 @@ $ podman machine start
 
 Create the root `./.env` file from the [./.env.example](./.env.example) and follow its description to configure the platforms required environment variables.
 
-Also create the root `./Makefile` file from [./resources/automation/local/Makefile](./resources/automation/local/Makefile) so it will be easy to manage the platforms from one location in the project.
+Also create the root `./Makefile` file from [./resources/automation/local/unix.Makefile](./resources/automation/local/unix.Makefile) if you are using Linux/macOS/WSL2, or [./resources/automation/local/win.Makefile](./resources/automation/local/win.Makefile) if your are using Windows, so it will be easy to manage the platforms from one location in the project.
+
+Also there is [./resources/automation/local/Makefile.child](./resources/automation/local/Makefile.child) to add to your service repository so you will be able to from from that directory.
 
 Each recipe from this root `Makefile` has its own action description and can be read to remember on terminal by executing `make help` command to see them all. This streamlines the workflow for managing containers with mnemonic recipe names, avoiding the effort of remembering and typing each bash command line:
 ```bash
