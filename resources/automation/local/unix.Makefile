@@ -65,7 +65,7 @@ network-destroy: ## destroys network
 .PHONY: web-hostcheck web-info web-set web-create web-network web-ssh web-start web-stop web-destroy
 
 web-hostcheck: ## shows this project ports availability on local machine for the container
-	cd ./platforms/$(WEBAPP_PLTF) && $(MAKE) port-check
+	cd ./platforms/$(WEBAPP_PLTF) && $(MAKE) hostcheck
 
 web-info: ## shows the container relevant information
 	cd ./platforms/$(WEBAPP_PLTF) && $(MAKE) info
@@ -131,7 +131,7 @@ web-destroy: ## destroys completely the container with its data
 .PHONY: api-hostcheck api-info api-set api-create api-network api-ssh api-start api-stop api-destroy
 
 api-hostcheck: ## shows this project ports availability on local machine for apirest container
-	cd ./platforms/$(API_PLTF) && $(MAKE) port-check
+	cd ./platforms/$(API_PLTF) && $(MAKE) hostcheck
 
 api-info: ## shows the container relevant information
 	cd ./platforms/$(API_PLTF) && $(MAKE) info
@@ -197,7 +197,7 @@ api-destroy: ## destroys completely the container with its data
 .PHONY: db-hostcheck db-info db-set db-create db-ssh db-start db-stop db-destroy
 
 db-hostcheck: ## shows this project ports availability on local machine for database container
-	cd ./platforms/$(DATABASE_PLTF) && $(MAKE) port-check
+	cd ./platforms/$(DATABASE_PLTF) && $(MAKE) hostcheck
 
 db-info: ## shows container relevant information
 	cd ./platforms/$(DATABASE_PLTF) && $(MAKE) info
@@ -287,7 +287,7 @@ db-sql-drop: ## drops the container main database but recreates the database wit
 .PHONY: mailer-hostcheck mailer-info mailer-set mailer-create mailer-network mailer-ssh mailer-start mailer-stop mailer-destroy
 
 mailer-hostcheck: ## shows this project ports availability on local machine for mailer container
-	cd ./platforms/$(MAILER_PLTF) && $(MAKE) port-check
+	cd ./platforms/$(MAILER_PLTF) && $(MAKE) hostcheck
 
 mailer-info: ## shows the container relevant information
 	cd ./platforms/$(MAILER_PLTF) && $(MAKE) info
@@ -349,7 +349,7 @@ mailer-destroy: ## destroys completely the container with its data
 .PHONY: broker-hostcheck broker-info broker-set broker-create broker-network broker-ssh broker-start broker-stop broker-destroy
 
 broker-hostcheck: ## shows this project ports availability on local machine for container
-	cd ./platforms/$(BROKER_PLTF) && $(MAKE) port-check
+	cd ./platforms/$(BROKER_PLTF) && $(MAKE) hostcheck
 
 broker-info: ## shows the container relevant information
 	cd ./platforms/$(BROKER_PLTF) && $(MAKE) info
