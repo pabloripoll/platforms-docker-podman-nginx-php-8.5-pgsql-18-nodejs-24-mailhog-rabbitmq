@@ -1,0 +1,21 @@
+services:
+
+  rabbitmq:
+    image: rabbitmq:4-management-alpine
+    container_name: ${COMPOSE_CAAS}
+    environment:
+      - RABBITMQ_DEFAULT_USER=${COMPOSE_APP_USER}
+      - RABBITMQ_DEFAULT_PASS=${COMPOSE_APP_PASS}
+      - RABBITMQ_NODENAME=${COMPOSE_APP_NODENAME}
+      - RABBITMQ_ERLANG_COOKIE=${COMPOSE_APP_COOKIE}
+    deploy:
+      resources:
+        limits:
+          cpus: ${COMPOSE_CPUS}
+          memory: ${COMPOSE_MEMO}
+    volumes:
+        - .${COMPOSE_DATA}:/var/lib/rabbitmq/
+        - .${COMPOSE_LOGS}:/var/log/rabbitmq
+        - ./config/conf.d/rabbitmq.conf:/etc/rabbitmq/rabbitmq.conf:ro
+    tty: true
+    restart: unless-stopped

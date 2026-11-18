@@ -1,49 +1,37 @@
 # This Makefile requires GNU Make.
 MAKEFLAGS += --silent
 
-# Settings
-
-ifeq ($(strip $(OS)),Windows_NT) # is Windows_NT on XP, 2000, 7, Vista, 10...
-    DETECTED_OS := Windows
-	C_BLU=''
-	C_GRN=''
-	C_RED=''
-	C_YEL=''
-	C_END=''
-else
-    DETECTED_OS := $(shell uname) # same as "uname -s"
-	C_BLU='\033[0;34m'
-	C_GRN='\033[0;32m'
-	C_RED='\033[0;31m'
-	C_YEL='\033[0;33m'
-	C_END='\033[0m'
-endif
-
-include ../../.env
-
-ENGINE_PLTF="RABBITMQ 4+"
-ENGINE_LEAD=$(SERVICE_LEAD)
-ENGINE_CNET=$(SERVICE_CNET)
-ENGINE_HOST=$(SERVICE_HOST)
-ENGINE_IMGK=$(BROKER_IMGK)
-ENGINE_PORT=$(BROKER_PORT)
-ENGINE_DATA=$(BROKER_DATA)
-ENGINE_LOGS=$(BROKER_LOGS)
-ENGINE_CAAS=$(BROKER_CAAS)
-ENGINE_CPUS=$(BROKER_CPUS)
-ENGINE_MEMO=$(BROKER_MEMO)
-ENGINE_SWAP=$(BROKER_SWAP)
-ENGINE_APP_PORT=$(BROKER_APP_PORT)
-ENGINE_APP_USER=$(BROKER_APP_USER)
-ENGINE_APP_PASS=$(BROKER_APP_PASS)
-ENGINE_APP_COOKIE=$(BROKER_APP_COOKIE)
-ENGINE_APP_NODENAME=$(BROKER_APP_NODENAME)
+# Linux / macOS / WSL2 codes for rendering colors
+C_BLU := '\033[0;34m'
+C_GRN := '\033[0;32m'
+C_RED := '\033[0;31m'
+C_YEL := '\033[0;33m'
+C_END := '\033[0m'
 
 DIR_ROOT=$(patsubst %/,%,$(dir $(realpath $(firstword $(MAKEFILE_LIST)))))
 DIR_BASENAME=$(shell basename $(DIR_ROOT))
 
-ENGINE_CONTAINER:=$(addsuffix -$(ENGINE_CAAS), $(ENGINE_LEAD))
-ENGINE_EXEC_SSH=$(ENGINE_COMMAND) exec -it $(ENGINE_CONTAINER) sh
+# Root environment variables
+include ../../.env
+
+# Container environment variables
+ENGINE_PLTF := "RABBITMQ 4+"
+ENGINE_LEAD := $(SERVICE_LEAD)
+ENGINE_CNET := $(SERVICE_CNET)
+ENGINE_HOST := $(SERVICE_HOST)
+ENGINE_IMGK := rabbitmq:4-management-alpine
+ENGINE_PORT := $(BROKER_PORT)
+ENGINE_DATA := $(BROKER_DATA)
+ENGINE_LOGS := $(BROKER_LOGS)
+ENGINE_CAAS := $(BROKER_CAAS)
+ENGINE_CPUS := $(BROKER_CPUS)
+ENGINE_MEMO := $(BROKER_MEMO)
+ENGINE_SWAP := $(BROKER_SWAP)
+ENGINE_APP_PORT := $(BROKER_APP_PORT)
+ENGINE_APP_USER := $(BROKER_APP_USER)
+ENGINE_APP_PASS := $(BROKER_APP_PASS)
+ENGINE_APP_COOKIE := $(BROKER_APP_COOKIE)
+ENGINE_APP_NODENAME := $(BROKER_APP_NODENAME)
 
 # -------------------------------------------------------------------------------------------------
 #  Help
@@ -58,56 +46,54 @@ help: ## shows this Makefile help message
 # -------------------------------------------------------------------------------------------------
 #  System
 # -------------------------------------------------------------------------------------------------
-.PHONY: port-check
+.PHONY: hostcheck
 
-port-check: ## shows this project port availability on local machine
-	echo "Checking configuration for "${C_YEL}"$(ENGINE_PLTF)"${C_END}" container:";
-	if [ -z "$($(ENGINE_COMMAND) lsof -i :$(ENGINE_PORT))" ]; then \
-		echo ${C_BLU}"$(ENGINE_PLTF)"${C_END}" > localhost:"${C_GRN}"$(ENGINE_PORT) is free to use."${C_END}; \
-    else \
-		echo ${C_BLU}"$(ENGINE_PLTF)"${C_END}" > localhost:"${C_RED}"$(ENGINE_PORT) is busy. Update ./.env file."${C_END}; \
+hostcheck: ## shows this project port availability on local machine
+	if [ -f ./container/.env ]; then \
+		echo "Checking configuration for "${C_YEL}"$(ENGINE_CAAS)"${C_END}" container:"; \
+		if [ -z "$($(ENGINE_COMMAND) lsof -i :$(ENGINE_PORT))" ]; then \
+			echo ${C_GRN}"$(ENGINE_CAAS)"${C_END}" can be served at 127.0.0.1:"${C_GRN}"$(ENGINE_PORT) (is free to use)."${C_END}; \
+		else \
+			echo ${C_RED}"$(ENGINE_CAAS)"${C_END}" can't be served at 127.0.0.1:"${C_RED}"$(ENGINE_PORT) (is busy)."${C_END}; \
+			echo ${C_YEL}"Update container configuration."${C_END}; \
+		fi \
+	else \
+		echo ${C_RED}"$(SERVICE_NAME) - Platform $(ENGINE_PLTF): Environment file does not exist!"${C_END}; \
+		echo ${C_YEL}"Create it with Makefile recipe or copy the platform's container/.env.example"${C_END}; \
 	fi
 
 # -------------------------------------------------------------------------------------------------
 #  Enviroment
 # -------------------------------------------------------------------------------------------------
-.PHONY: env env-set
+.PHONY: env-set
 
-env: ## checks if docker .env file exists
-	if [ -f ./docker/.env ]; then \
-		echo ${C_BLU}"$(SERVICE_NAME)"${C_END}" - $(ENGINE_PLTF) "${C_YEL}"docker-compose.yml"${C_END}" .env file "${C_GRN}"is set."${C_END}; \
-	else \
-		echo ${C_BLU}"$(SERVICE_NAME)"${C_END}" - $(ENGINE_PLTF) "${C_YEL}"docker-compose.yml"${C_END}" .env file "${C_RED}"is not set."${C_END}" \
-		Create it by executing "${C_YEL}"$$ make env-set"${C_END}; \
-	fi
-
-env-set: ## sets docker .env file
-ifeq ($(DETECTED_OS), Windows)
-	echo "Recipe do not support for Windows NT at this moment - You have to manually create .env file from ./docker/.env.example";
-else
-	@echo "COMPOSE_LEAD=$(ENGINE_LEAD)" > ./docker/.env
-	@echo "COMPOSE_CNET=$(ENGINE_CNET)" >> ./docker/.env
-	@echo "COMPOSE_IMGK=$(ENGINE_IMGK)" >> ./docker/.env
-	@echo "COMPOSE_HOST=$(ENGINE_HOST)" >> ./docker/.env
-	@echo "COMPOSE_PORT=$(ENGINE_PORT)" >> ./docker/.env
-	@echo "COMPOSE_DATA=\"$(ENGINE_DATA)\"" >> ./docker/.env
-	@echo "COMPOSE_LOGS=\"$(ENGINE_LOGS)\"" >> ./docker/.env
-	@echo "COMPOSE_NAME=$(ENGINE_CAAS)" >> ./docker/.env
-	@echo "COMPOSE_CPUS=$(ENGINE_CPUS)" >> ./docker/.env
-	@echo "COMPOSE_MEMO=$(ENGINE_MEMO)" >> ./docker/.env
-	@echo "COMPOSE_SWAP=$(ENGINE_SWAP)" >> ./docker/.env
-	@echo "COMPOSE_APP_PORT=$(ENGINE_APP_PORT)" >> ./docker/.env
-	@echo "COMPOSE_APP_USER=$(ENGINE_APP_USER)" >> ./docker/.env
-	@echo "COMPOSE_APP_PASS=\"$(ENGINE_APP_PASS)\"" >> ./docker/.env
-	@echo "COMPOSE_APP_COOKIE=\"$(ENGINE_APP_COOKIE)\"" >> ./docker/.env
-	@echo "COMPOSE_APP_NODENAME=\"$(ENGINE_APP_NODENAME)\"" >> ./docker/.env
-	echo ${C_BLU}"$(SERVICE_NAME)"${C_END}" MESSAGE BROKER "${C_YEL}$(ENGINE_PLTF)${C_END}" - "${C_YEL}"docker-compose.yml"${C_END}" .env file "${C_GRN}"has been set."${C_END};
-	echo ${C_BLU}"$(SERVICE_NAME)"${C_END}" MESSAGE BROKER "${C_YEL}$(ENGINE_PLTF)${C_END}" - Container: "${C_GRN}$(ENGINE_CONTAINER)${C_END}
-	echo ${C_BLU}"$(SERVICE_NAME)"${C_END}" MESSAGE BROKER "${C_YEL}$(ENGINE_PLTF)${C_END}" - Max. CPUs: "${C_GRN}$(ENGINE_CPUS)${C_END}
-	echo ${C_BLU}"$(SERVICE_NAME)"${C_END}" MESSAGE BROKER "${C_YEL}$(ENGINE_PLTF)${C_END}" - Max. memory usage: "${C_GRN}$(ENGINE_MEMO)${C_END}" - swap: "${C_GRN}$(ENGINE_SWAP)${C_END}
-	echo ${C_BLU}"$(SERVICE_NAME)"${C_END}" MESSAGE BROKER "${C_YEL}$(ENGINE_PLTF)${C_END}" - AMQP is served at: http://"${C_GRN}$(word 1,$(shell hostname -I)):$(ENGINE_PORT)${C_END}
-	echo ${C_BLU}"$(SERVICE_NAME)"${C_END}" MESSAGE BROKER "${C_YEL}$(ENGINE_PLTF)${C_END}" - APP is served at: http://127.0.0.1:"${C_GRN}$(ENGINE_APP_PORT)${C_END}
-endif
+env-set: ## sets container .env file
+	@echo "COMPOSE_LEAD=$(ENGINE_LEAD)" > ./container/.env
+	@echo "COMPOSE_CNET=$(ENGINE_CNET)" >> ./container/.env
+	@echo "COMPOSE_IMGK=$(ENGINE_IMGK)" >> ./container/.env
+	@echo "COMPOSE_HOST=$(ENGINE_HOST)" >> ./container/.env
+	@echo "COMPOSE_PORT=$(ENGINE_PORT)" >> ./container/.env
+	@echo "COMPOSE_DATA=\"$(ENGINE_DATA)\"" >> ./container/.env
+	@echo "COMPOSE_LOGS=\"$(ENGINE_LOGS)\"" >> ./container/.env
+	@echo "COMPOSE_CAAS=$(ENGINE_CAAS)" >> ./container/.env
+	@echo "COMPOSE_CPUS=$(ENGINE_CPUS)" >> ./container/.env
+	@echo "COMPOSE_MEMO=$(ENGINE_MEMO)" >> ./container/.env
+	@echo "COMPOSE_SWAP=$(ENGINE_SWAP)" >> ./container/.env
+	@echo "COMPOSE_APP_PORT=$(ENGINE_APP_PORT)" >> ./container/.env
+	@echo "COMPOSE_APP_USER=$(ENGINE_APP_USER)" >> ./container/.env
+	@echo "COMPOSE_APP_PASS=\"$(ENGINE_APP_PASS)\"" >> ./container/.env
+	@echo "COMPOSE_APP_COOKIE=\"$(ENGINE_APP_COOKIE)\"" >> ./container/.env
+	@echo "COMPOSE_APP_NODENAME=\"$(ENGINE_APP_NODENAME)\"" >> ./container/.env
+	@echo ${C_BLU}"$(SERVICE_NAME)"${C_END}" MAIL SANDBOX "${C_YEL}$(ENGINE_PLTF)${C_END}" .env file "${C_GRN}"has been set."${C_END};
+	@echo "Directory..........: "${C_GRN}"platforms/$(DIR_BASENAME)"${C_END}
+	@echo "Container name.....: "${C_GRN}$(ENGINE_CAAS)${C_END}
+	@echo "Container image....: "${C_GRN}$(ENGINE_CAAS):$(ENGINE_IMGK)${C_END}
+	@echo "Max. CPUs..........: "${C_GRN}$(ENGINE_CPUS)${C_END}
+	@echo "Max. memory / Swap.: "${C_GRN}$(ENGINE_MEMO)${C_END}" / "${C_GRN}$(ENGINE_SWAP)${C_END}
+	@echo "AMQP Host..........: http://$(word 1,$(shell hostname -I)):"${C_GRN}"$(ENGINE_PORT)"${C_END}
+	@echo "APP Address........: http://127.0.0.1:"${C_GRN}"$(ENGINE_APP_PORT)"${C_END}
+	@echo "Data Directory.....: [root-path]/platforms/$(DIR_BASENAME)$(subst .,,$(ENGINE_DATA))"
+	@echo "Logs Directory.....: [root-path]/platforms/$(DIR_BASENAME)$(subst .,,$(ENGINE_LOGS))"
 
 # -------------------------------------------------------------------------------------------------
 #  Container
@@ -115,47 +101,58 @@ endif
 .PHONY: info ssh up build network start stop restart clear destroy dev
 
 info: ## shows container information
-	echo ${C_BLU}"$(SERVICE_NAME)"${C_END}" - BROKER: "${C_GRN}"$(ENGINE_PLTF)"${C_END};
-	printf ${C_YEL}"Container ID.: "${C_END}; $(ENGINE_COMMAND) ps -aqf "name=^$(ENGINE_CONTAINER)$$"; printf "%s";
-	echo ${C_YEL}"Name.........: "${C_END}$(ENGINE_CONTAINER);
-	echo ${C_YEL}"Image........: "${C_END}"$(ENGINE_CONTAINER):$(ENGINE_IMGK)";
-	echo ${C_YEL}"CPUs.........: "${C_END}"$(ENGINE_CPUS)";
-	echo ${C_YEL}"Memory.......: "${C_END}"$(ENGINE_MEMO)";
-	echo ${C_YEL}"Host.........: "${C_END}"$(ENGINE_HOST):$(ENGINE_PORT)";
-	echo ${C_YEL}"Hostname.....: "${C_END}"$(word 1,$(shell hostname -I)):"$(ENGINE_PORT);
-	echo ${C_YEL}"App.Host.....: "${C_END}"http://127.0.0.1:$(ENGINE_APP_PORT)";
-	printf ${C_YEL}"Docker.Host..: "${C_END};$(ENGINE_COMMAND) inspect -f '{{range.NetworkSettings.Networks}}{{.IPAddress}}{{end}}' $(ENGINE_CONTAINER);
-	printf ${C_YEL}"NetworkID....: "${C_END};$(ENGINE_COMMAND) inspect -f '{{range.NetworkSettings.Networks}}{{.NetworkID}}{{end}}' $(ENGINE_CONTAINER);
+	if [ -f ./container/.env ]; then \
+		echo ${C_YEL}"Project......: "${C_END}"$(SERVICE_NAME)"; \
+		echo ${C_YEL}"Platform.....: "${C_END}"$(ENGINE_PLTF)"; \
+		echo ${C_YEL}"Directory....: "${C_END}"platforms/$(DIR_BASENAME)"; \
+		CID=$$($(ENGINE_COMMAND) ps -aqf "name=^$(ENGINE_CAAS)$$"); echo ${C_YEL}"Container ID.: "${C_END}"$${CID:-null}"; \
+		echo ${C_YEL}"Name.........: "${C_END}"$(ENGINE_CAAS)"; \
+		echo ${C_YEL}"Image........: "${C_END}"$(ENGINE_CAAS):$(ENGINE_IMGK)"; \
+		echo ${C_YEL}"CPUs.........: "${C_END}"$(ENGINE_CPUS)"; \
+		echo ${C_YEL}"RAM..........: "${C_END}"$(ENGINE_MEMO)"; \
+		echo ${C_YEL}"SWAP.........: "${C_END}"$(ENGINE_SWAP)"; \
+		echo ${C_YEL}"AMQP Host....: "${C_END}"$(word 1,$(shell hostname -I)):"$(ENGINE_PORT); \
+		echo ${C_YEL}"APP Address..: "${C_END}"http://127.0.0.1:"$(ENGINE_APP_PORT); \
+		echo ${C_YEL}"Data.........: "${C_END}"[root-path]/platforms/$(DIR_BASENAME)$(subst .,,$(ENGINE_DATA))"; \
+		echo ${C_YEL}"Logs.........: "${C_END}"[root-path]/platforms/$(DIR_BASENAME)$(subst .,,$(ENGINE_LOGS))"; \
+		DIP=$$($(ENGINE_COMMAND) inspect -f '{{range.NetworkSettings.Networks}}{{.IPAddress}}{{end}}' $(ENGINE_CAAS) 2>/dev/null); echo ${C_YEL}"Docker.Host..: "${C_END}"$${DIP:-null}"; \
+		NID=$$($(ENGINE_COMMAND) inspect -f '{{range.NetworkSettings.Networks}}{{.NetworkID}}{{end}}' $(ENGINE_CAAS) 2>/dev/null); echo ${C_YEL}"NetworkID....: "${C_END}"$${NID:-null}"; \
+	else \
+		echo ${C_RED}"$(SERVICE_NAME) - Platform $(ENGINE_PLTF): Environment file does not exist!"${C_END}; \
+		echo ${C_YEL}"Create it with Makefile recipe or copy the platform's container/.env.example"${C_END}; \
+	fi
 
 ssh: ## enters the container shell
-	$(ENGINE_EXEC_SSH)
+	$(ENGINE_COMMAND) exec -it $(ENGINE_CAAS) sh
 
 up: ## starts and recreates containers if compose config or image changed, runnning in detached mode
-	cd docker && $(ENGINE_COMPOSE) -f docker-compose.yml -f docker-compose.public.yml up -d
+	cd container && $(ENGINE_COMPOSE) -f docker-compose.yml -f docker-compose.public.yml up -d
 
 build: ## builds and ensures changes in the Dockerfile, build steps, or copied-in files are applied. Not --no-recreate
-	cd docker && $(ENGINE_COMPOSE) -f docker-compose.yml -f docker-compose.public.yml up --build -d
+	cd container && $(ENGINE_COMPOSE) -f docker-compose.yml -f docker-compose.public.yml up --build -d
 
 network: ## starts up into an existing custom network for container-to-container communication, runnning in detached mode
-	cd docker && $(ENGINE_COMPOSE) -f docker-compose.yml -f docker-compose.network.yml up -d
+	cd container && $(ENGINE_COMPOSE) -f docker-compose.yml -f docker-compose.network.yml up -d
+
+host-gateway: ## starts up for container-to-host communication, runnning in detached mode
+	cd container && $(ENGINE_COMPOSE) -f docker-compose.yml -f docker-compose.host-gateway.yml up -d
 
 start: ## starts the container and put on running from latest configuration
-	cd docker && $(ENGINE_COMPOSE) start
+	cd container && $(ENGINE_COMPOSE) start
 
-stop: ## stops the running container but data won't be destroyed
-	cd docker && $(ENGINE_COMPOSE) stop
+stop: ## stops the running container but data will not be destroyed
+	cd container && $(ENGINE_COMPOSE) stop
 
 restart: ## restarts the running container
-	cd docker && $(ENGINE_COMMAND) restart $(ENGINE_CONTAINER)
+	cd container && $(ENGINE_COMMAND) restart $(ENGINE_CAAS)
 
-clear: ## removes container from Docker running containers with its network and volume established
-	cd docker && $(ENGINE_COMPOSE) kill || true
-	cd docker && $(ENGINE_COMPOSE) down --volumes --remove-orphans || true
+clear: ## removes container from Docker running containers
+	cd container && $(ENGINE_COMPOSE) kill || true
+	cd container && $(ENGINE_COMPOSE) down --volumes --remove-orphans || true
 
 destroy: ## delete container image from Docker cache
-	cd docker && $(ENGINE_COMMAND) rmi -f $(ENGINE_IMGK)
-	$(SUDO) rm -rf $(ENGINE_DATA)
-	$(SUDO) rm -rf $(ENGINE_LOGS)
+	cd container && $(ENGINE_COMMAND) rmi -f $(ENGINE_IMGK)
 
 dev: ## sets a development enviroment
 	echo ${C_YEL}"\"dev\" recipe has not usage in this project"${C_END};
+
