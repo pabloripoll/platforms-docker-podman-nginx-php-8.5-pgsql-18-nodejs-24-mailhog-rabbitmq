@@ -30,13 +30,13 @@ Sources:
 
 There is a dedicated GNU Make file and the main Docker directory with the required scripts to build the required platform configuration.
 
-This service platform is designed to be managed by a parent `./../../.env` but, as it feeds `./docker/.env` through GNU Make, it can be edited manually.
+This service platform is designed to be managed by a parent `./../../.env` but, as it feeds `./container/.env` through GNU Make, it can be edited manually.
 
-If no GNU Make is in used, create a copy from the example `./docker/.env.example` into `./docker/.env`.
+If no GNU Make is in used, create a copy from the example `./container/.env.example` into `./container/.env`.
 
-The service container can be easily manage by the `./docker/docker-compose.yml`.
+The service container can be easily manage by the `./container/container-compose.yml`.
 
-Require environment variables at `./docker/.env` *(all are customizable)*:
+Require environment variables at `./container/.env` *(all are customizable)*:
 ```bash
 COMPOSE_LEAD=myproj                         # <- lead abbreviation or acronym as part of related containers naming rule -------------------------> #
 COMPOSE_CNET=mp-dev                         # <- real main image keys to manage automations for sharing resources -------------------------------> #
@@ -55,9 +55,9 @@ COMPOSE_APP_PORT=7505                       # <- application ui management port 
 
 ### Containers Access Modes
 
-- Set the required environment values in `./docker/.env` from `./docker/.env.example` if no GNU Make will be applied.
+- Set the required environment values in `./container/.env` from `./container/.env.example` if no GNU Make will be applied.
 - Set the required configuration files by coping and updating them depending on your project requirements.
-- Container availability by building the container with `docker-composer.yml` in separated configuration layers
+- Container availability by building the container with `container-composer.yml` in separated configuration layers
     - Stand-alone
         - The container is intended to be published directly and accessed from the host network, typically via `0.0.0.0:<port>`. It does not require a shared Docker network. It is a common setting for local development.
     - Inside a Custom Network
@@ -82,16 +82,16 @@ $ make help
 Usage: $ make [target]
 Targets:
 $ make help                           shows this Makefile help message
-$ make port-check                     shows this project port availability on local machine
-$ make env                            checks if docker .env file exists
-$ make env-set                        sets docker .env file
+$ make hostcheck                      shows this project port availability on local machine
+$ make env-set                        sets container .env file
 $ make info                           shows container information
 $ make ssh                            enters the container shell
 $ make up                             starts and recreates containers if compose config or image changed, runnning in detached mode
 $ make build                          builds and ensures changes in the Dockerfile, build steps, or copied-in files are applied. Not --no-recreate
 $ make network                        starts up into an existing custom network for container-to-container communication, runnning in detached mode
+$ make host-gateway                   starts up for container-to-host communication, runnning in detached mode
 $ make start                          starts the container and put on running from latest configuration
-$ make stop                           stops the running container but data won't be destroyed
+$ make stop                           stops the running container but data will not be destroyed
 $ make restart                        restarts the running container
 $ make clear                          removes container from Docker running containers
 $ make destroy                        delete container image from Docker cache
