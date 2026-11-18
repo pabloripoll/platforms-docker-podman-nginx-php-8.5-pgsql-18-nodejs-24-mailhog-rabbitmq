@@ -34,7 +34,7 @@ This service platform is designed to be managed by a parent `./../../.env` but, 
 
 If no GNU Make is in used, create a copy from the example `./container/.env.example` into `./container/.env`.
 
-The service container can be easily manage by the `./container/container-compose.yml`.
+The service container can be easily manage by the `./container/docker-compose.yml`.
 
 Require environment variables at `./container/.env` *(all are customizable)*:
 ```bash
