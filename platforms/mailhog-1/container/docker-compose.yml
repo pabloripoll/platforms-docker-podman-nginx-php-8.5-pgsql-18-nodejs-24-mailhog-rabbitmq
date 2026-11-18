@@ -6,7 +6,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    container_name: "${COMPOSE_LEAD}-${COMPOSE_NAME}"
+    container_name: "${COMPOSE_CAAS}"
     restart: unless-stopped
     deploy:
       resources:
