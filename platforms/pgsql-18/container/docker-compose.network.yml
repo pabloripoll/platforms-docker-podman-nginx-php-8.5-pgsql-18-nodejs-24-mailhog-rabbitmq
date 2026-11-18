@@ -10,7 +10,7 @@ networks:
   net:
     driver: bridge
     external: true
-    name: ${COMPOSE_LEAD}-${COMPOSE_CNET}
+    name: ${COMPOSE_CNET}
   default:
     external: true
-    name: ${COMPOSE_LEAD}-${COMPOSE_CNET}
+    name: ${COMPOSE_CNET}

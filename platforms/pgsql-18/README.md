@@ -16,6 +16,8 @@
 Content:
 - Linux Alpine 3.24
 - PostgreSQL 18
+    - `postgres:18-alpine3.24`
+    - `Dockerfile`
 <br><br>
 
 Sources:
@@ -39,13 +41,13 @@ For outstanding postgres image PRs, check [PRs with the "library/postgres" label
 
 There is a dedicated GNU Make file and the main Docker directory with the required scripts to build the required platform configuration.
 
-This service platform is designed to be managed by a parent `./../../.env` but, as it feeds `./docker/.env` through GNU Make, it can be edited manually.
+This service platform is designed to be managed by a parent `./../../.env` but, as it feeds `./container/.env` through GNU Make, it can be edited manually.
 
-If no GNU Make is in used, create a copy from the example `./docker/.env.example` into `./docker/.env`.
+If no GNU Make is in used, create a copy from the example `./container/.env.example` into `./container/.env`.
 
-The service container can be easily manage by the `./docker/docker-compose.yml`.
+The service container can be easily manage by the `./container/docker-compose.yml`.
 
-Require environment variables at `./docker/.env` *(all are customizable)*:
+Require environment variables at `./container/.env` *(all are customizable)*:
 ```bash
 COMPOSE_LEAD=myproj                                 # <- lead abbreviation or acronym as part of related containers naming rule -------------------------> #
 COMPOSE_CNET=mp-dev                                 # <- useful for networking to connect between containers --------------------------------------------> #
@@ -67,7 +69,7 @@ POSTGRES_PASSWORD="password-dev"                    # <- database password -----
 
 ### Containers Access Modes
 
-- Set the required environment values in `./docker/.env` from `./docker/.env.example` if no GNU Make will be applied.
+- Set the required environment values in `./container/.env` from `./container/.env.example` if no GNU Make will be applied.
 - Set the required configuration files by coping and updating them depending on your project requirements.
 - Container availability by building the container with `docker-composer.yml` in separated configuration layers
     - Stand-alone
@@ -101,7 +103,6 @@ Usage: $ make [target]
 Targets:
 $ make help                           shows this Makefile help message
 $ make port-check                     shows this project port availability on local machine
-$ make env                            checks if docker .env file exists
 $ make env-set                        sets docker .env file
 $ make info                           shows container information
 $ make ssh                            enters the container shell

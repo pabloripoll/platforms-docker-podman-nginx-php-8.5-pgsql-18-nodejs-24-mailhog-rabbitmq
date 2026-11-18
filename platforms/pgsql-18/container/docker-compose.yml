@@ -1,16 +1,12 @@
 services:
 
   pgsql:
-    # From local
-    #image: ${COMPOSE_LEAD}-${COMPOSE_NAME}:${COMPOSE_IMGK}
-    #pull_policy: never
-    #build:
-    #  context: ./
-    #  dockerfile: Dockerfile
-    # From Dockerhub
-    image: postgres:18-alpine3.24
-    #
-    container_name: ${COMPOSE_LEAD}-${COMPOSE_NAME}
+    image: ${COMPOSE_CAAS}:${COMPOSE_IMGK}
+    pull_policy: never
+    build:
+      context: ./
+      dockerfile: Dockerfile
+    container_name: ${COMPOSE_CAAS}
     deploy:
       resources:
         limits:

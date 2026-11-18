@@ -244,7 +244,7 @@ db-destroy: ## destroys completely the container with its data
     else \
 		cd ./platforms/$(DATABASE_PLTF) && $(MAKE) clear destroy; \
 		echo ${C_GRN}"O.K.! $(DATABASE_CAAS) container has been down and cleared."${C_END}; \
-		@echo -n ${C_YEL}"Do you want to clear $(ENGINE) cache? "${C_END}"[y/n]: " && read response && if [ $${response:-'n'} != 'y' ]; then \
+		echo -n ${C_YEL}"Do you want to clear $(ENGINE) cache? "${C_END}"[y/n]: " && read response && if [ $${response:-'n'} != 'y' ]; then \
 			echo ${C_YEL}"The following commands are delegated to be executed by user:"${C_END}; \
 			echo "$$ $(ENGINE_COMMAND) system prune"; \
 			echo "$$ $(ENGINE_COMMAND) volume prune"; \
@@ -334,7 +334,7 @@ mailer-destroy: ## destroys completely the container with its data
     else \
 		cd ./platforms/$(MAILER_PLTF) && $(MAKE) clear destroy; \
 		echo ${C_GRN}"O.K.! $(MAILER_CAAS) container has been down and cleared."${C_END}; \
-		@echo -n ${C_YEL}"Do you want to clear $(ENGINE) cache? "${C_END}"[y/n]: " && read response && if [ $${response:-'n'} != 'y' ]; then \
+		echo -n ${C_YEL}"Do you want to clear $(ENGINE) cache? "${C_END}"[y/n]: " && read response && if [ $${response:-'n'} != 'y' ]; then \
 			echo ${C_YEL}"The following command is delegated to be executed by user:"${C_END}; \
 			echo "$$ $(ENGINE_COMMAND) system prune"; \
 		else \
@@ -396,7 +396,7 @@ broker-destroy: ## destroys completely the container with its data
     else \
 		cd ./platforms/$(BROKER_PLTF) && $(MAKE) clear destroy; \
 		echo ${C_GRN}"O.K.! $(BROKER_CAAS) container continues with its latest status."${C_END}; \
-		@echo -n ${C_YEL}"Do you want to clear $(ENGINE) cache? "${C_END}"[y/n]: " && read response && if [ $${response:-'n'} != 'y' ]; then \
+		echo -n ${C_YEL}"Do you want to clear $(ENGINE) cache? "${C_END}"[y/n]: " && read response && if [ $${response:-'n'} != 'y' ]; then \
 			echo ${C_YEL}"The following command is delegated to be executed by user:"${C_END}; \
 			echo "$$ $(ENGINE_COMMAND) system prune"; \
 		else \
