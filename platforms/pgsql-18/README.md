@@ -10,6 +10,8 @@
 
 ## <a id="features"></a>Features
 
+![Docker](https://shields.io/badge/docker-%230db7ed.svg?style=for-the-badge&logo=docker&logoColor=white)
+![Podman](https://shields.io/badge/-Podman-892CA0?style=for-the-badge&logo=podman&logoColor=white)
 ![Alpine Linux](https://shields.io/badge/Alpine_Linux-%230D597F.svg?style=for-the-badge&logo=alpine-linux&logoColor=white)
 ![PostgreSQL](https://shields.io/badge/postgresql-4169e1?style=for-the-badge&logo=postgresql&logoColor=white)
 
@@ -51,7 +53,7 @@ Require environment variables at `./container/.env` *(all are customizable)*:
 ```bash
 COMPOSE_LEAD=myproj                                 # <- lead abbreviation or acronym as part of related containers naming rule -------------------------> #
 COMPOSE_CNET=mp-dev                                 # <- useful for networking to connect between containers --------------------------------------------> #
-COMPOSE_IMGK=alpine-3.24-pgsql-18                   # <- real main image keys to manage automations for sharing resources -------------------------------> #
+COMPOSE_IMGK=postgres:18-alpine3.24                 # <- dockerhub image keys to manage automations - for platform dockerfile use: alpine-3.24-pgsql-18 -> #
 COMPOSE_NAME=mp-pgsql-dev                           # <- container name to build the service - it is important to set the environment in this variable --> #
 COMPOSE_HOST=127.0.0.1                              # <- machine hostname referrer - not necessary for this project -------------------------------------> #
 COMPOSE_PORT=7710                                   # <- local machine port opened for container service ------------------------------------------------> #
@@ -102,8 +104,8 @@ $ make help
 Usage: $ make [target]
 Targets:
 $ make help                           shows this Makefile help message
-$ make port-check                     shows this project port availability on local machine
-$ make env-set                        sets docker .env file
+$ make hostcheck                      shows this project port availability on local machine
+$ make env-set                        sets container .env file
 $ make info                           shows container information
 $ make ssh                            enters the container shell
 $ make up                             starts and recreates containers if compose config or image changed, runnning in detached mode
@@ -113,18 +115,14 @@ $ make start                          starts the container and put on running fr
 $ make stop                           stops the running container but data will not be destroyed
 $ make restart                        restarts the running container
 $ make clear                          removes container from Docker running containers
-$ make destroy                        delete container image from Docker cache
+$ make destroy                        delete container image from Docker cache - $(ENGINE_IMGK)
 $ make dev                            sets a development enviroment
-$ make test-up                        creates a side database for tests
-$ make test-down                      drops the side database for tests
-$ make sql-install                    imports [file-name].sql file into database container as an initial project database located in /[dir-path]/
-$ make sql-install-clear              clears up the [file-name].sql file as an initial project database located in /[dir-path]/
-$ make sql-replace                    replaces the database container with the located in /[dir-path]/[file-name].sql file
-$ make sql-backup                     exports into [file-name].sql file the project database backup into /[dir-path]/
-$ make sql-backup-clear               clears up the project database backup [file-name].sql file located in /[dir-path]/
-$ make sql-drop                       drops the current database and creates an empty new one inside the container
-$ make remote-host-copy               copies referenced remote database by tcp connection into /[dir-path]/[file-name].sql for local development
-$ make remote-file-copy               copies referenced remote database file into /[dir-path]/[file-name].sql for local development
+$ make test-up                        creates a side database for testing porpuses
+$ make test-down                      drops the side testing database
+$ make sql-install                    migrates sql file with schema / data into the container main database to init a project
+$ make sql-replace                    replaces the container main database with the latest database .sql backup file
+$ make sql-backup                     copies the container main database as backup into a .sql file
+$ make sql-drop                       drops the container main database but recreates the database without schema as a reset action
 ```
 <br>
 
