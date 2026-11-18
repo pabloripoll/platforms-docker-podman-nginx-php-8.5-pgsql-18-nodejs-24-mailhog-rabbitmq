@@ -82,10 +82,8 @@ env-set: ## sets container .env file
 	@echo "Container image....: "${C_GRN}$(ENGINE_CAAS):$(ENGINE_IMGK)${C_END}
 	@echo "Max. CPUs..........: "${C_GRN}$(ENGINE_CPUS)${C_END}
 	@echo "Max. memory / Swap.: "${C_GRN}$(ENGINE_MEMO)${C_END}" / "${C_GRN}$(ENGINE_SWAP)${C_END}
-	@echo "Localhost..........: 127.0.0.1:"${C_GRN}"$(ENGINE_PORT)"${C_END};
-	@echo "Hostname...........: $(word 1,$(shell hostname -I)):"${C_GRN}"$(ENGINE_PORT)"${C_END};
 	@echo "SMTP Host..........: http://$(word 1,$(shell hostname -I))"${C_GRN}:$(ENGINE_PORT)${C_END}
-	@echo "APP/API............: http://127.0.0.1:"${C_GRN}$(MAILER_APP_PORT)${C_END}
+	@echo "APP/API Address....: http://127.0.0.1:"${C_GRN}$(MAILER_APP_PORT)${C_END}
 	@echo "Data Directory.....: [root-path]/platforms/$(DIR_BASENAME)$(subst .,,$(ENGINE_DATA))"
 	@echo "Logs Directory.....: [root-path]/platforms/$(DIR_BASENAME)$(subst .,,$(ENGINE_LOGS))"
 
@@ -105,9 +103,8 @@ info: ## shows container information
 		echo ${C_YEL}"CPUs.........: "${C_END}"$(ENGINE_CPUS)"; \
 		echo ${C_YEL}"RAM..........: "${C_END}"$(ENGINE_MEMO)"; \
 		echo ${C_YEL}"SWAP.........: "${C_END}"$(ENGINE_SWAP)"; \
-		echo ${C_YEL}"Host.........: "${C_END}"$(ENGINE_HOST):$(ENGINE_PORT)"; \
-		echo ${C_YEL}"SMPT.........: "${C_END}"$(word 1,$(shell hostname -I)):"$(ENGINE_PORT); \
-		echo ${C_YEL}"APP/API......: "${C_END}"http://127.0.0.1:"$(MAILER_APP_PORT); \
+		echo ${C_YEL}"SMPT Host....: "${C_END}"$(word 1,$(shell hostname -I)):"$(ENGINE_PORT); \
+		echo ${C_YEL}"APP/API Addr.: "${C_END}"http://127.0.0.1:"$(MAILER_APP_PORT); \
 		echo ${C_YEL}"Data.........: "${C_END}"[root-path]/platforms/$(DIR_BASENAME)$(subst .,,$(ENGINE_DATA))"; \
 		echo ${C_YEL}"Logs.........: "${C_END}"[root-path]/platforms/$(DIR_BASENAME)$(subst .,,$(ENGINE_LOGS))"; \
 		DIP=$$($(ENGINE_COMMAND) inspect -f '{{range.NetworkSettings.Networks}}{{.IPAddress}}{{end}}' $(ENGINE_CAAS) 2>/dev/null); echo ${C_YEL}"Docker.Host..: "${C_END}"$${DIP:-null}"; \
